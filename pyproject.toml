@@ -1,0 +1,28 @@
+[build-system]
+requires = [
+    "setuptools>=80.9.0"
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "thermoelasticity_fem"
+version = "0.1.0"
+authors = [
+    { name = "Rémi Capillon" },
+]
+description = "A Finite Element solver for thermoelasticity in Python"
+readme = "README.md"
+requires-python = ">=3.12"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "numpy >= 2.3.2",
+    "scipy >= 1.16.1",
+    "matplotlib >= 3.10.5"
+]
+
+[project.urls]
+"Homepage" = "https://github.com/rcapillon/thermoelasticity_fem"
