@@ -1,4 +1,5 @@
 import meshio
+import numpy as np
 
 
 class Mesh:
@@ -23,15 +24,35 @@ class Mesh:
 
         for i, arr in enumerate(mesh.cell_data['gmsh:physical']):
             tag = arr[0]
-            if mesh.cells[i]['type'] == 'vertex':
-                self.dict_nodes_groups[tag] = mesh.cells[i].data.flatten()
-            elif mesh.cells[i]['type'] == 'triangle':
-                self.dict_tri_groups[tag] = mesh.cells[i].data
-            elif mesh.cells[i]['type'] == 'tetra':
-                self.dict_tet_groups[tag] = mesh.cells[i].data
+            if mesh.cells[i].type == 'vertex':
+                if tag not in self.dict_nodes_groups.keys():
+                    self.dict_nodes_groups[tag] = mesh.cells[i].data.flatten()
+                else:
+                    self.dict_nodes_groups[tag] = np.concatenate((self.dict_nodes_groups[tag],
+                                                                  mesh.cells[i].data.flatten()))
+            elif mesh.cells[i].type == 'triangle':
+                if tag not in self.dict_tri_groups.keys():
+                    self.dict_tri_groups[tag] = mesh.cells[i].data
+                else:
+                    self.dict_tri_groups[tag] = np.concatenate((self.dict_tri_groups[tag], mesh.cells[i].data), axis=0)
+            elif mesh.cells[i].type == 'tetra':
+                if tag not in self.dict_tet_groups.keys():
+                    self.dict_tet_groups[tag] = mesh.cells[i].data
+                else:
+                    self.dict_tet_groups[tag] = np.concatenate((self.dict_tet_groups[tag], mesh.cells[i].data), axis=0)
 
     def set_materials(self, dict_materials):
         self.dict_materials = dict_materials
 
     def make_elements(self):
         """"""
+
+    def make_meshio_mesh(self):
+        tets = []
+        for v in self.dict_tet_groups.values():
+            tets.extend(v.tolist())
+        cells = [('tetra', tets)]
+        mesh = meshio.Mesh(self.table_nodes, cells)
+
+        return mesh
+
