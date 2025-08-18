@@ -1,0 +1,15 @@
+# sandwich.msh
+# mesh of a 3-layer sandwich beam with rectangular cross-section
+
+# 3D physical groups
+# tag 1: bottom layer
+# tag 2: middle layer
+# tag 3: top layer
+
+# 2D physical groups
+# tag 4: first end cross-section (x=0)
+# tag 5: second end cross-section (x=2)
+# tag 6: bottom surface (z=0)
+
+# 0D physical groups
+# tag 7: middle node of top surface (z=0.3)
