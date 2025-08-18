@@ -2,5 +2,8 @@
 A Finite Element solver for thermoelasticity in Python
 
 ## Bibliography
-[1] Balla, M. “FORMULATION OF COUPLED PROBLEMS OF THERMOELASTICITY BY FINITE ELEMENTS”, 
-Periodica Polytechnica Mechanical Engineering, 33(1-2), pp. 59–70, 1989. 
+[1] Balla, M. “Formulation of coupled problems of thermoelasticity by finite elements", 
+Periodica Polytechnica Mechanical Engineering, 1989.
+[2] Selverian, J., Johnston, D., Johnson, M. A., Fox, K. M., & Hellmann, J. R. 
+"Temperature dependent elastic properties of several commercial glasses", 
+High Temperatures - High Pressures, 2010.
