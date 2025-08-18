@@ -172,6 +172,26 @@ def compute_mat_Dt_e():
     return mat_Dt_e
 
 
+####
+# Element matrices at gauss points
+
+list_mat_Eu_e_gauss = []
+list_mat_Et_e_gauss = []
+for i in range(n_gauss):
+    gauss_point_i = gauss[i][0]
+    mat_Eu_e_i = compute_mat_Eu_e(gauss_point_i)
+    list_mat_Eu_e_gauss.append(mat_Eu_e_i)
+    mat_Et_e_i = compute_mat_Eu_e(gauss_point_i)
+    list_mat_Et_e_gauss.append(mat_Et_e_i)
+
+mat_Du_e_gauss = compute_mat_Du_e()
+mat_Dt_e_gauss = compute_mat_Dt_e()
+mat_divu_e_gauss = compute_mat_divu_e()
+
+
+####
+# Tet4 Element class
+
 class Element:
     """
     Class for 4-node tetrahedal elements
@@ -181,6 +201,7 @@ class Element:
         self.material = material
         self.nodes_nums = nodes_nums
         self.nodes_coords = nodes_coords
+        self.vec_nodes_coords = np.reshape(self.nodes_coords, 12)
 
         self.dofs_nums_u = []
         for node_num in nodes_nums:
@@ -189,12 +210,7 @@ class Element:
         for node_num in nodes_nums:
             self.dofs_nums_t.append(node_num * 4 + 3)
 
-        self.det_J = None
-        self.mat_invJJJ = None
-
         self.mat_Muu_e = None
-        self.mat_Mtu_e = None
-        self.mat_Mtt_e = None
 
         self.mat_Dtu_e = None
         self.mat_Dtt_e = None
@@ -202,4 +218,25 @@ class Element:
         self.mat_Kuu_e = None
         self.mat_Kut_e = None
         self.mat_Ktt_e = None
+
+    def compute_jacobian_at_gauss_point(self):
+        mat_J1 = np.dot(mat_Du_e_gauss[:3, :],  self.vec_nodes_coords)
+        mat_J2 = np.dot(mat_Du_e_gauss[3:6, :], self.vec_nodes_coords)
+        mat_J3 = np.dot(mat_Du_e_gauss[6:, :],  self.vec_nodes_coords)
+
+        mat_J = np.vstack((mat_J1, mat_J2, mat_J3))
+        det_J = np.linalg.det(mat_J)
+
+        if det_J < 0:
+            raise ValueError(f'Element {self.number} has negative jacobian.')
+        elif det_J == 0:
+            raise ValueError(f'Element {self.number} has zero jacobian.')
+
+        mat_invJ = np.linalg.inv(mat_J)
+        mat_invJJJ = np.zeros((9, 9))
+        mat_invJJJ[0:3, 0:3] = mat_invJ
+        mat_invJJJ[3:6, 3:6] = mat_invJ
+        mat_invJJJ[6:9, 6:9] = mat_invJ
+
+        return det_J, mat_invJJJ
 
