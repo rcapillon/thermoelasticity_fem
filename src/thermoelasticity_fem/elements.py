@@ -96,7 +96,7 @@ def derivative_shapefun_value(shapefun_idx, derivative_coord_idx):
     return value
 
 
-def compute_mat_Ee(reference_coords):
+def compute_mat_Eu_e(reference_coords):
     mat_I = np.eye(3)
     mat_E0 = shapefun_value(0, reference_coords) * mat_I
     mat_E1 = shapefun_value(1, reference_coords) * mat_I
@@ -108,7 +108,7 @@ def compute_mat_Ee(reference_coords):
     return mat_Ee
 
 
-def compute_mat_De():
+def compute_mat_Du_e():
     mat_I = np.eye(3)
 
     mat_D0dx = derivative_shapefun_value(0, 1) * mat_I
@@ -135,6 +135,18 @@ def compute_mat_De():
     mat_De = np.concatenate((mat_Ddx, mat_Ddy, mat_Ddz), axis=0)
 
     return mat_De
+
+
+def compute_mat_divu_e():
+    """"""
+
+
+def compute_mat_Et_e(reference_coords):
+    """"""
+
+
+def compute_mat_Dt_e():
+    """"""
 
 
 class Element:
