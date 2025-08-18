@@ -138,15 +138,38 @@ def compute_mat_Du_e():
 
 
 def compute_mat_divu_e():
-    """"""
+    mat_divu_e = np.zeros((1, 12))
+    mat_divu_e[0] = derivative_shapefun_value(0, 1)
+    mat_divu_e[1] = derivative_shapefun_value(0, 2)
+    mat_divu_e[2] = derivative_shapefun_value(0, 3)
+    mat_divu_e[3] = derivative_shapefun_value(1, 1)
+    mat_divu_e[4] = derivative_shapefun_value(1, 2)
+    mat_divu_e[5] = derivative_shapefun_value(1, 3)
+    mat_divu_e[6] = derivative_shapefun_value(2, 1)
+    mat_divu_e[7] = derivative_shapefun_value(2, 2)
+    mat_divu_e[8] = derivative_shapefun_value(2, 3)
+    mat_divu_e[9] = derivative_shapefun_value(3, 1)
+    mat_divu_e[10] = derivative_shapefun_value(3, 2)
+    mat_divu_e[11] = derivative_shapefun_value(3, 3)
+
+    return mat_divu_e
 
 
 def compute_mat_Et_e(reference_coords):
-    """"""
+    mat_Et_e = np.zeros((1, 4))
+    for i in range(4):
+        mat_Et_e[i] = shapefun_value(i, reference_coords)
+
+    return mat_Et_e
 
 
 def compute_mat_Dt_e():
-    """"""
+    mat_Dt_e = np.zeros((3, 4))
+    for i in range(3):
+        for j in range(4):
+            mat_Dt_e[i, j] = derivative_shapefun_value(j, i + 1)
+
+    return mat_Dt_e
 
 
 class Element:
