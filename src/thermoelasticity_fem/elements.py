@@ -63,6 +63,78 @@ gauss = [(np.array([0.5854101966, 0.1381966011, 0.1381966011]), 0.0416666667),
          (np.array([0.1381966011, 0.1381966011, 0.5854101966]), 0.0416666667),
          (np.array([0.1381966011, 0.1381966011, 0.1381966011]), 0.0416666667)]
 
+####
+# Functions used for calculating element matrices at gauss points
+
+def shapefun_value(node_idx, reference_coords):
+    # N_i(x, y, z) = a + b*x + c*y + d*z
+
+    x = reference_coords[0]
+    y = reference_coords[1]
+    z = reference_coords[2]
+
+    value = shapefun_coeffs[0, node_idx] \
+            + shapefun_coeffs[1, node_idx] * x \
+            + shapefun_coeffs[2, node_idx] * y \
+            + shapefun_coeffs[3, node_idx] * z
+
+    return value
+
+
+def derivative_shapefun_value(shapefun_idx, derivative_coord_idx):
+    # dNdx_i(x, y, z) = b
+    # dNdy_i(x, y, z) = c
+    # dNdz_i(x, y, z) = d
+
+    # derivative_coord_idx: 1 -> derivative with respect to x
+    # derivative_coord_idx: 2 -> derivative with respect to y
+    # derivative_coord_idx: 3 -> derivative with respect to z
+
+    value = shapefun_coeffs[derivative_coord_idx, shapefun_idx]
+
+    return value
+
+
+def compute_mat_Ee(reference_coords):
+    mat_I = np.eye(3)
+    mat_E0 = shapefun_value(0, reference_coords) * mat_I
+    mat_E1 = shapefun_value(1, reference_coords) * mat_I
+    mat_E2 = shapefun_value(2, reference_coords) * mat_I
+    mat_E3 = shapefun_value(3, reference_coords) * mat_I
+
+    mat_Ee = np.concatenate((mat_E0, mat_E1, mat_E2, mat_E3), axis=1)
+
+    return mat_Ee
+
+
+def compute_mat_De():
+    mat_I = np.eye(3)
+
+    mat_D0dx = derivative_shapefun_value(0, 1) * mat_I
+    mat_D1dx = derivative_shapefun_value(1, 1) * mat_I
+    mat_D2dx = derivative_shapefun_value(2, 1) * mat_I
+    mat_D3dx = derivative_shapefun_value(3, 1) * mat_I
+
+    mat_Ddx = np.concatenate((mat_D0dx, mat_D1dx, mat_D2dx, mat_D3dx), axis=1)
+
+    mat_D0dy = derivative_shapefun_value(0, 2) * mat_I
+    mat_D1dy = derivative_shapefun_value(1, 2) * mat_I
+    mat_D2dy = derivative_shapefun_value(2, 2) * mat_I
+    mat_D3dy = derivative_shapefun_value(3, 2) * mat_I
+
+    mat_Ddy = np.concatenate((mat_D0dy, mat_D1dy, mat_D2dy, mat_D3dy), axis=1)
+
+    mat_D0dz = derivative_shapefun_value(0, 3) * mat_I
+    mat_D1dz = derivative_shapefun_value(1, 3) * mat_I
+    mat_D2dz = derivative_shapefun_value(2, 3) * mat_I
+    mat_D3dz = derivative_shapefun_value(3, 3) * mat_I
+
+    mat_Ddz = np.concatenate((mat_D0dz, mat_D1dz, mat_D2dz, mat_D3dz), axis=1)
+
+    mat_De = np.concatenate((mat_Ddx, mat_Ddy, mat_Ddz), axis=0)
+
+    return mat_De
+
 
 class Element:
     """
