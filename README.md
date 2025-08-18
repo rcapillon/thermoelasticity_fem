@@ -1,5 +1,5 @@
 # thermoelasticity_fem
-A Finite Element solver for thermoelasticity in Python
+A Finite Element solver for linear thermoelasticity in Python
 
 ## Bibliography
 [1] Balla, M. “Formulation of coupled problems of thermoelasticity by finite elements", 
