@@ -118,7 +118,7 @@ class Model:
                         self.vec_F[(node * 4):(node * 4 + 3)] += volume * vec_f / 4
         # Heat flux
         if self.dict_heat_flux is not None:
-            for tag, vec_q in self.dict_heat_flux.items():
+            for tag, q in self.dict_heat_flux.items():
                 table_tri = self.mesh.dict_tri_groups[tag]
                 for i in range(table_tri.shape[0]):
                     nodes = table_tri[i, :]
@@ -129,7 +129,7 @@ class Model:
                     X13 = X3 - X1
                     area = 0.5 * np.abs(np.dot(X12, X13))
                     for node in nodes:
-                        self.vec_F[node * 4 + 3] += area * vec_q / 3
+                        self.vec_F[node * 4 + 3] += area * q / 3
         # Heat source
         if self.dict_heat_source is not None:
             for tag, rhoR in self.dict_heat_source.items():
