@@ -170,7 +170,7 @@ class Model:
                     dirichlet_dofs_U = []
                     for node in dirichlet_nodes_U:
                         dirichlet_dofs_U.extend([node * 4, node * 4 + 1, node * 4 + 2])
-                        vec_U[[node * 4, node * 4 + 1, node * 4 + 2]] += vec_u
+                        vec_U[[node * 4, node * 4 + 1, node * 4 + 2]] = vec_u
                     vec_U_d = vec_U[dirichlet_dofs_U]
                     mat_K_f_dU = self.mat_K[self.free_dofs, :][:, dirichlet_dofs_U]
                     self.vec_F_f -= mat_K_f_dU @ vec_U_d
@@ -182,7 +182,7 @@ class Model:
                     dirichlet_dofs_T = []
                     for node in dirichlet_nodes_T:
                         dirichlet_dofs_T.append(node * 4 + 3)
-                        vec_T[node * 4 + 3] += T
+                        vec_T[node * 4 + 3] = T
                     vec_T_d = vec_T[dirichlet_dofs_T]
                     mat_K_f_dT = self.mat_K[self.free_dofs, :][:, dirichlet_dofs_T]
                     self.vec_F_f -= mat_K_f_dT @ vec_T_d
