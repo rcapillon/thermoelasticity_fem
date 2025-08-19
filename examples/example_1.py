@@ -3,19 +3,73 @@ import sys
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '../src'))
 
+import numpy as np
 import pyvista as pv
 
+from thermoelasticity_fem.materials import glass_SG773
 from thermoelasticity_fem.mesh import Mesh
+from thermoelasticity_fem.model import Model
+from thermoelasticity_fem.solvers import LinearThermoStatics
 
 
 if __name__ == '__main__':
-    msh = Mesh()
-    msh.load_mesh('../data/sandwich.msh')
+    mesh = Mesh()
+    mesh.load_mesh('../data/sandwich2.msh')
 
-    mesh = msh.make_meshio_mesh()
+    material = glass_SG773
+    dict_materials = {
+        1: material,
+        2: material,
+        3: material
+    }
+    mesh.set_materials(dict_materials)
+    mesh.make_elements()
+
+    vec_u_dir1 = np.array([0., 0., 0.])
+    vec_u_dir2 = np.array([0., 0., 0.])
+    dict_dirichlet_U = {
+        4: vec_u_dir1,
+        5: vec_u_dir2
+    }
+
+    T_dir1 = 20.
+    T_dir2 = 20.
+    T_dir3 = 40.
+    dict_dirichlet_T = {
+        4: T_dir1,
+        5: T_dir2,
+        7: T_dir3
+    }
+
+    vec_f_surf = np.array([0., 0., -1e9])
+    dict_surface_forces = {
+        7: vec_f_surf
+    }
+
+    q = 250.
+    dict_heat_flux = {
+        6: q
+    }
+
+    model = Model(mesh,
+                  dict_dirichlet_U=dict_dirichlet_U, dict_dirichlet_T=dict_dirichlet_T,
+                  dict_surface_forces=dict_surface_forces,
+                  dict_heat_flux=dict_heat_flux)
+
+    solver = LinearThermoStatics(model)
+    solver.solve()
+
+    ####
+    # Interactive plot (deformed mesh, temperature as color)
+
+    mio_mesh = mesh.make_meshio_mesh()
 
     p = pv.Plotter()
-    pv_mesh = pv.from_meshio(mesh)
-    p.add_mesh(mesh, show_edges=True)
+    pv_mesh = pv.from_meshio(mio_mesh)
+    pv_mesh.point_data['T'] = solver.temperature
+    pv_mesh.set_active_scalars('T')
+    pv_mesh['U'] = solver.displacement.reshape((mesh.n_nodes, 3))
+    warped_mesh = pv_mesh.warp_by_vector('U', factor=1.)
+    p.add_mesh(warped_mesh, show_edges=True)
     p.show_axes()
     p.show()
