@@ -6,7 +6,7 @@ class Model:
     def __init__(self, mesh,
                  dict_dirichlet_U=None, dict_dirichlet_T=None,
                  dict_nodal_forces=None, dict_surface_forces=None, dict_volume_forces=None,
-                 dict_heat_flux=None):
+                 dict_heat_flux=None, dict_heat_source=None):
         self.mesh = mesh
 
         self.dict_dirichlet_U = dict_dirichlet_U
@@ -16,6 +16,7 @@ class Model:
 
         self.dict_dirichlet_T = dict_dirichlet_T
         self.dict_heat_flux = dict_heat_flux
+        self.dict_heat_source = dict_heat_source
 
         self.free_dofs = None
 
@@ -129,6 +130,22 @@ class Model:
                     area = 0.5 * np.abs(np.dot(X12, X13))
                     for node in nodes:
                         self.vec_F[node * 4 + 3] += area * vec_q / 3
+        # Heat source
+        if self.dict_heat_source is not None:
+            for tag, rhoR in self.dict_heat_source.items():
+                table_tet = self.mesh.dict_tet_groups[tag]
+                for i in range(table_tet.shape[0]):
+                    nodes = table_tet[i, :]
+                    X1 = self.mesh.table_nodes[nodes[0], :]
+                    X2 = self.mesh.table_nodes[nodes[1], :]
+                    X3 = self.mesh.table_nodes[nodes[2], :]
+                    X4 = self.mesh.table_nodes[nodes[3], :]
+                    X12 = X2 - X1
+                    X13 = X3 - X1
+                    X14 = X4 - X1
+                    volume = np.abs(np.dot(X14, np.cross(X13, X12))) / 6
+                    for node in nodes:
+                        self.vec_F[node * 4 + 3] += volume * rhoR / 4
 
     def clear_full_matvec(self):
         self.mat_M = None
