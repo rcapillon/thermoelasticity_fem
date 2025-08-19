@@ -5,13 +5,13 @@ from thermoelasticity_fem.elements import Element
 
 
 class Mesh:
-    def __init__(self, dict_materials):
+    def __init__(self):
         self.path_to_mesh = None
         self.n_nodes = None
         self.n_dofs = None
         self.n_elements = None
         self.table_nodes = None
-        self.dict_materials = dict_materials
+        self.dict_materials = {}
         self.dict_nodes_groups = {}
         self.dict_tri_groups = {}
         self.dict_tet_groups = {}
