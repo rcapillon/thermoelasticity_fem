@@ -22,7 +22,7 @@ class Mesh:
         mesh = meshio.read(path_to_mesh)
         self.table_nodes = mesh.points
         self.n_nodes = self.table_nodes.shape[0]
-        self.n_dofs = self.n_nodes * 3
+        self.n_dofs = self.n_nodes * 4
 
         for i, arr in enumerate(mesh.cell_data['gmsh:physical']):
             tag = arr[0]
