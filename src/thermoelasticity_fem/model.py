@@ -141,8 +141,13 @@ class Model:
         self.vec_F = None
 
     def apply_dirichlet(self):
-        self.mat_M_f_f = self.mat_M[self.free_dofs, self.free_dofs]
-        self.mat_D_f_f = self.mat_D[self.free_dofs, self.free_dofs]
-        self.mat_K_f_f = self.mat_K[self.free_dofs, self.free_dofs]
-        self.vec_F_f = self.vec_F[self.free_dofs]
-        # TODO: put Dirichlet conditions (U & T) in vec_F_f
+        if self.mat_M is not None:
+            self.mat_M_f_f = self.mat_M[self.free_dofs, self.free_dofs]
+        if self.mat_D is not None:
+            self.mat_D_f_f = self.mat_D[self.free_dofs, self.free_dofs]
+        if self.mat_K is not None:
+            self.mat_K_f_f = self.mat_K[self.free_dofs, self.free_dofs]
+        if self.vec_F is not None:
+            self.vec_F_f = self.vec_F[self.free_dofs]
+            # TODO: put Dirichlet conditions (U & T) in vec_F_f
+        # TODO: clear full matrices and vector after
