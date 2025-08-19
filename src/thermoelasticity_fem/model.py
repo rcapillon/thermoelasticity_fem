@@ -7,7 +7,6 @@ class Model:
                  dict_dirichlet_U=None, dict_dirichlet_T=None,
                  dict_nodal_forces=None, dict_surface_forces=None, dict_volume_forces=None,
                  dict_heat_flux=None):
-                 # alpha_M=None, alpha_K=None):
         self.mesh = mesh
 
         self.dict_dirichlet_U = dict_dirichlet_U
@@ -17,9 +16,6 @@ class Model:
 
         self.dict_dirichlet_T = dict_dirichlet_T
         self.dict_heat_flux = dict_heat_flux
-
-        # self.alpha_M = alpha_M
-        # self.alpha_K = alpha_K
 
         self.free_dofs = None
 
