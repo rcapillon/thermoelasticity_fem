@@ -34,12 +34,13 @@ if __name__ == '__main__':
 
     T_dir1 = 20.
     T_dir2 = 20.
-    T_dir3 = 20.
+    T_dir3 = 50.
     dict_dirichlet_T = {
         4: T_dir1,
         5: T_dir2,
         7: T_dir3
     }
+    # dict_dirichlet_T = None
 
     vec_f_surf = np.array([0., 0., -1e9])
     dict_surface_forces = {
