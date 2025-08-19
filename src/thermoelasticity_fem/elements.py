@@ -27,9 +27,9 @@ mat_P[7, 5] = 1
 mat_P[8, 8] = 1
 
 mat_P_divu = np.zeros((1, 9))
-mat_P_divu[0] = 1
-mat_P_divu[4] = 1
-mat_P_divu[8] = 1
+mat_P_divu[0, 0] = 1
+mat_P_divu[0, 4] = 1
+mat_P_divu[0, 8] = 1
 
 # Reference coordinates of the nodes
 
