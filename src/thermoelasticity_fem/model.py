@@ -139,3 +139,10 @@ class Model:
         self.mat_D = None
         self.mat_K = None
         self.vec_F = None
+
+    def apply_dirichlet(self):
+        self.mat_M_f_f = self.mat_M[self.free_dofs, self.free_dofs]
+        self.mat_D_f_f = self.mat_D[self.free_dofs, self.free_dofs]
+        self.mat_K_f_f = self.mat_K[self.free_dofs, self.free_dofs]
+        self.vec_F_f = self.vec_F[self.free_dofs]
+        # TODO: put Dirichlet conditions (U & T) in vec_F_f
