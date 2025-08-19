@@ -34,7 +34,7 @@ if __name__ == '__main__':
 
     T_dir1 = 20.
     T_dir2 = 20.
-    T_dir3 = 40.
+    T_dir3 = 20.
     dict_dirichlet_T = {
         4: T_dir1,
         5: T_dir2,
@@ -45,16 +45,25 @@ if __name__ == '__main__':
     dict_surface_forces = {
         7: vec_f_surf
     }
+    # dict_surface_forces = None
 
     q = 250.
     dict_heat_flux = {
         6: q
     }
+    # dict_heat_flux = None
+
+    # rho = material.rho
+    # R = 1e3
+    # dict_heat_source = {
+    #     2: rho * R
+    # }
+    dict_heat_source = None
 
     model = Model(mesh,
                   dict_dirichlet_U=dict_dirichlet_U, dict_dirichlet_T=dict_dirichlet_T,
                   dict_surface_forces=dict_surface_forces,
-                  dict_heat_flux=dict_heat_flux)
+                  dict_heat_flux=dict_heat_flux, dict_heat_source=dict_heat_source)
 
     solver = LinearThermoStatics(model)
     solver.solve()
