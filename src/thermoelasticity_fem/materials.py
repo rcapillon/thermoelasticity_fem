@@ -2,13 +2,14 @@ import numpy as np
 
 
 class LinearThermoElastic:
-    def __init__(self, rho, Y, nu, k, c, alpha):
+    def __init__(self, rho, Y, nu, k, c, alpha, T0):
         self.rho = rho
         self.Y = Y
         self.nu = nu
         self.k = k
         self.c = c
         self.alpha = alpha
+        self.T0 = T0
         self.beta = None
         self.compute_beta()
         self.mat_C = None
@@ -29,4 +30,4 @@ class LinearThermoElastic:
 
 
 # based on glass SG773 in [2]
-glass = LinearThermoElastic(rho=2300, Y=64e9, nu=0.1, k=1, c=750, alpha=4e-6)
+glass = LinearThermoElastic(rho=2300, Y=64e9, nu=0.1, k=1., c=750., alpha=4e-6, T0=20.)
