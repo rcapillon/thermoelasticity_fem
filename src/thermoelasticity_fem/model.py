@@ -1,9 +1,13 @@
+import numpy as np
+from scipy.sparse import csc_array
+
+
 class Model:
     def __init__(self, mesh,
                  dict_dirichlet_U=None, dict_dirichlet_T=None,
                  dict_nodal_forces=None, dict_surface_forces=None, dict_volume_forces=None,
-                 dict_heat_flux=None,
-                 alpha_M=None, alpha_K=None):
+                 dict_heat_flux=None):
+                 # alpha_M=None, alpha_K=None):
         self.mesh = mesh
 
         self.dict_dirichlet_U = dict_dirichlet_U
@@ -14,10 +18,15 @@ class Model:
         self.dict_dirichlet_T = dict_dirichlet_T
         self.dict_heat_flux = dict_heat_flux
 
-        self.alpha_M = alpha_M
-        self.alpha_K = alpha_K
+        # self.alpha_M = alpha_M
+        # self.alpha_K = alpha_K
 
         self.free_dofs = None
+
+        self.mat_M = None
+        self.mat_D = None
+        self.mat_K = None
+        self.vec_F = None
 
         self.mat_M_f_f = None
         self.mat_D_f_f = None
@@ -43,3 +52,33 @@ class Model:
             dirichlet_dofs_T.append(node * 4 + 3)
         all_dirichlet_dofs = dirichlet_dofs_U + dirichlet_dofs_T
         self.free_dofs = [dof for dof in range(self.mesh.n_dofs) if dof not in all_dirichlet_dofs]
+
+    def assemble_M(self):
+        self.mat_M = np.zeros((self.mesh.n_dofs, self.mesh.n_dofs))
+        for element in self.mesh.elements:
+            mat_Muu_e = element.compute_mat_Muu_e()
+            self.mat_M[element.dofs_nums_u, element.dofs_nums_u] += mat_Muu_e
+
+    def assemble_K(self):
+        self.mat_K = np.zeros((self.mesh.n_dofs, self.mesh.n_dofs))
+        for element in self.mesh.elements:
+            mat_Kuu_e = element.compute_mat_Kuu_e()
+            self.mat_K[element.dofs_nums_u, element.dofs_nums_u] += mat_Kuu_e
+            mat_Kut_e = element.compute_mat_Kut_e()
+            self.mat_K[element.dofs_nums_u, element.dofs_nums_t] += mat_Kut_e
+            mat_Ktt_e = element.compute_mat_Ktt_e()
+            self.mat_K[element.dofs_nums_t, element.dofs_nums_t] += mat_Ktt_e
+
+    def assemble_D(self):
+        self.mat_D = np.zeros((self.mesh.n_dofs, self.mesh.n_dofs))
+        for element in self.mesh.elements:
+            mat_Dtu_e = element.compute_mat_Dtu_e()
+            self.mat_D[element.dofs_nums_t, element.dofs_nums_u] += mat_Dtu_e
+            mat_Dtt_e = element.compute_mat_Dtt_e()
+            self.mat_D[element.dofs_nums_t, element.dofs_nums_t] += mat_Dtt_e
+
+    def clear_full_matvec(self):
+        self.mat_M = None
+        self.mat_D = None
+        self.mat_K = None
+        self.vec_F = None
