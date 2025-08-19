@@ -30,4 +30,4 @@ class LinearThermoElastic:
 
 
 # based on glass SG773 in [2]
-glass = LinearThermoElastic(rho=2300, Y=64e9, nu=0.1, k=1., c=750., alpha=4e-6, T0=20.)
+glass_SG773 = LinearThermoElastic(rho=2300, Y=64e9, nu=0.1, k=1., c=750., alpha=4e-6, T0=20.)
