@@ -26,6 +26,11 @@ mat_P[6, 2] = 1
 mat_P[7, 5] = 1
 mat_P[8, 8] = 1
 
+mat_P_divu = np.zeros((1, 9))
+mat_P_divu[0] = 1
+mat_P_divu[4] = 1
+mat_P_divu[8] = 1
+
 # Reference coordinates of the nodes
 
 nodes_reference_coords = np.array([[0.0, 0.0, 0.0],
@@ -137,24 +142,6 @@ def compute_mat_Du_e():
     return mat_De
 
 
-def compute_mat_divu_e():
-    mat_divu_e = np.zeros((1, 12))
-    mat_divu_e[0] = derivative_shapefun_value(0, 1)
-    mat_divu_e[1] = derivative_shapefun_value(0, 2)
-    mat_divu_e[2] = derivative_shapefun_value(0, 3)
-    mat_divu_e[3] = derivative_shapefun_value(1, 1)
-    mat_divu_e[4] = derivative_shapefun_value(1, 2)
-    mat_divu_e[5] = derivative_shapefun_value(1, 3)
-    mat_divu_e[6] = derivative_shapefun_value(2, 1)
-    mat_divu_e[7] = derivative_shapefun_value(2, 2)
-    mat_divu_e[8] = derivative_shapefun_value(2, 3)
-    mat_divu_e[9] = derivative_shapefun_value(3, 1)
-    mat_divu_e[10] = derivative_shapefun_value(3, 2)
-    mat_divu_e[11] = derivative_shapefun_value(3, 3)
-
-    return mat_divu_e
-
-
 def compute_mat_Et_e(reference_coords):
     mat_Et_e = np.zeros((1, 4))
     for i in range(4):
@@ -186,7 +173,6 @@ for i in range(n_gauss):
 
 mat_Du_e_gauss = compute_mat_Du_e()
 mat_Dt_e_gauss = compute_mat_Dt_e()
-mat_divu_e_gauss = compute_mat_divu_e()
 
 
 ####
@@ -210,33 +196,91 @@ class Element:
         for node_num in nodes_nums:
             self.dofs_nums_t.append(node_num * 4 + 3)
 
-        self.mat_Muu_e = None
-
-        self.mat_Dtu_e = None
-        self.mat_Dtt_e = None
-
-        self.mat_Kuu_e = None
-        self.mat_Kut_e = None
-        self.mat_Ktt_e = None
-
     def compute_jacobian_at_gauss_point(self):
         mat_J1 = np.dot(mat_Du_e_gauss[:3, :],  self.vec_nodes_coords)
         mat_J2 = np.dot(mat_Du_e_gauss[3:6, :], self.vec_nodes_coords)
         mat_J3 = np.dot(mat_Du_e_gauss[6:, :],  self.vec_nodes_coords)
 
-        mat_J = np.vstack((mat_J1, mat_J2, mat_J3))
-        det_J = np.linalg.det(mat_J)
+        mat_Jt = np.vstack((mat_J1, mat_J2, mat_J3))
+        det_J = np.linalg.det(mat_Jt)
 
         if det_J < 0:
             raise ValueError(f'Element {self.number} has negative jacobian.')
         elif det_J == 0:
             raise ValueError(f'Element {self.number} has zero jacobian.')
 
-        mat_invJ = np.linalg.inv(mat_J)
-        mat_invJJJ = np.zeros((9, 9))
-        mat_invJJJ[0:3, 0:3] = mat_invJ
-        mat_invJJJ[3:6, 3:6] = mat_invJ
-        mat_invJJJ[6:9, 6:9] = mat_invJ
+        mat_invJt = np.linalg.inv(mat_Jt)
+        mat_invJtJtJt = np.zeros((9, 9))
+        mat_invJtJtJt[0:3, 0:3] = mat_invJt
+        mat_invJtJtJt[3:6, 3:6] = mat_invJt
+        mat_invJtJtJt[6:9, 6:9] = mat_invJt
 
-        return det_J, mat_invJJJ
+        return det_J, mat_invJt, mat_invJtJtJt
 
+    def compute_mat_Muu_e(self):
+        mat_Muu_e = np.zeros((12, 12))
+
+        det_J, _, _ = self.compute_jacobian_at_gauss_point()
+
+        for i, (_, gauss_weight) in enumerate(gauss):
+            mat_Muu_e += (gauss_weight * self.material.rho * det_J *
+                          np.dot(list_mat_Eu_e_gauss[i].T, list_mat_Eu_e_gauss[i]))
+
+        return mat_Muu_e
+
+    def compute_mat_Dtu_e(self):
+        mat_Dtu_e = np.zeros((4, 12))
+
+        det_J, _, mat_invJtJtJt = self.compute_jacobian_at_gauss_point()
+
+        for i, (_, gauss_weight) in enumerate(gauss):
+            mat_divu = np.dot(mat_P_divu, np.dot(mat_invJtJtJt, mat_Du_e_gauss))
+            mat_Dtu_e += (gauss_weight * det_J * self.material.beta * self.material.T0 *
+                          np.dot(list_mat_Et_e_gauss[i].T, mat_divu))
+
+        return mat_Dtu_e
+
+    def compute_mat_Dtt_e(self):
+        mat_Dtt_e = np.zeros((4, 4))
+
+        det_J, _, _ = self.compute_jacobian_at_gauss_point()
+
+        for i, (_, gauss_weight) in enumerate(gauss):
+            mat_Dtt_e += (gauss_weight * det_J * self.material.rho * self.material.c *
+                          np.dot(list_mat_Et_e_gauss[i].T, list_mat_Et_e_gauss[i]))
+
+        return mat_Dtt_e
+
+    def compute_mat_Kuu_e(self):
+        mat_Kuu_e = np.zeros((12, 12))
+
+        det_J, _, mat_invJtJtJt = self.compute_jacobian_at_gauss_point()
+        mat_B = np.dot(mat_G, np.dot(mat_invJtJtJt, np.dot(mat_P, mat_Du_e_gauss)))
+
+        for i, (_, gauss_weight) in enumerate(gauss):
+            mat_Kuu_e += gauss_weight * det_J * np.dot(mat_B.transpose(), np.dot(self.material.mat_C, mat_B))
+
+        return mat_Kuu_e
+
+    def compute_mat_Kut_e(self):
+        mat_Kut_e = np.zeros((12, 4))
+
+        det_J, mat_invJt, _ = self.compute_jacobian_at_gauss_point()
+        mat_grad_t = np.dot(mat_invJt, mat_Dt_e_gauss)
+
+        for i, (_, gauss_weight) in enumerate(gauss):
+            mat_Kut_e += (gauss_weight * det_J * self.material.beta *
+                          np.dot(list_mat_Eu_e_gauss[i].T, mat_grad_t))
+
+        return mat_Kut_e
+
+    def compute_mat_Ktt_e(self):
+        mat_Ktt_e = np.zeros((4, 4))
+
+        det_J, mat_invJt, _ = self.compute_jacobian_at_gauss_point()
+        mat_grad_t = np.dot(mat_invJt, mat_Dt_e_gauss)
+
+        for i, (_, gauss_weight) in enumerate(gauss):
+            mat_Ktt_e += gauss_weight * det_J * self.material.k * np.dot(mat_grad_t.T, mat_grad_t)
+
+        return mat_Ktt_e
