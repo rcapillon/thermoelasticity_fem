@@ -14,7 +14,7 @@ from thermoelasticity_fem.solvers import LinearThermoStatics
 
 if __name__ == '__main__':
     mesh = Mesh()
-    mesh.load_mesh('../data/sandwich2.msh')
+    mesh.load_mesh('../data/sandwich.msh')
 
     material = glass_SG773
     dict_materials = {
