@@ -54,27 +54,27 @@ class Model:
         self.mat_M = np.zeros((self.mesh.n_dofs, self.mesh.n_dofs))
         for element in self.mesh.elements:
             mat_Muu_e = element.compute_mat_Muu_e()
-            self.mat_M[element.dofs_nums_u, element.dofs_nums_u] += mat_Muu_e
+            self.mat_M[np.ix_(element.dofs_nums_u, element.dofs_nums_u)] += mat_Muu_e
         self.mat_M = csc_array(self.mat_M)
 
     def assemble_K(self):
         self.mat_K = np.zeros((self.mesh.n_dofs, self.mesh.n_dofs))
         for element in self.mesh.elements:
             mat_Kuu_e = element.compute_mat_Kuu_e()
-            self.mat_K[element.dofs_nums_u, element.dofs_nums_u] += mat_Kuu_e
+            self.mat_K[np.ix_(element.dofs_nums_u, element.dofs_nums_u)] += mat_Kuu_e
             mat_Kut_e = element.compute_mat_Kut_e()
-            self.mat_K[element.dofs_nums_u, element.dofs_nums_t] += mat_Kut_e
+            self.mat_K[np.ix_(element.dofs_nums_u, element.dofs_nums_t)] += mat_Kut_e
             mat_Ktt_e = element.compute_mat_Ktt_e()
-            self.mat_K[element.dofs_nums_t, element.dofs_nums_t] += mat_Ktt_e
+            self.mat_K[np.ix_(element.dofs_nums_t, element.dofs_nums_t)] += mat_Ktt_e
         self.mat_K = csc_array(self.mat_K)
 
     def assemble_D(self):
         self.mat_D = np.zeros((self.mesh.n_dofs, self.mesh.n_dofs))
         for element in self.mesh.elements:
             mat_Dtu_e = element.compute_mat_Dtu_e()
-            self.mat_D[element.dofs_nums_t, element.dofs_nums_u] += mat_Dtu_e
+            self.mat_D[np.ix_(element.dofs_nums_t, element.dofs_nums_u)] += mat_Dtu_e
             mat_Dtt_e = element.compute_mat_Dtt_e()
-            self.mat_D[element.dofs_nums_t, element.dofs_nums_t] += mat_Dtt_e
+            self.mat_D[np.ix_(element.dofs_nums_t, element.dofs_nums_t)] += mat_Dtt_e
         self.mat_D = csc_array(self.mat_D)
 
     def assemble_F(self):
@@ -155,11 +155,11 @@ class Model:
 
     def apply_dirichlet(self):
         if self.mat_M is not None:
-            self.mat_M_f_f = self.mat_M[self.free_dofs, self.free_dofs]
+            self.mat_M_f_f = self.mat_M[self.free_dofs, :][:, self.free_dofs]
         if self.mat_D is not None:
-            self.mat_D_f_f = self.mat_D[self.free_dofs, self.free_dofs]
+            self.mat_D_f_f = self.mat_D[self.free_dofs, :][:, self.free_dofs]
         if self.mat_K is not None:
-            self.mat_K_f_f = self.mat_K[self.free_dofs, self.free_dofs]
+            self.mat_K_f_f = self.mat_K[self.free_dofs, :][:, self.free_dofs]
         if self.vec_F is not None:
             self.vec_F_f = self.vec_F[self.free_dofs]
             if self.dict_dirichlet_U is not None and self.mat_K is not None:
@@ -170,10 +170,10 @@ class Model:
                     dirichlet_dofs_U = []
                     for node in dirichlet_nodes_U:
                         dirichlet_dofs_U.extend([node * 4, node * 4 + 1, node * 4 + 2])
-                        vec_U[[node * 4, node * 4 + 1, node * 4 + 2]] += vec_U
+                        vec_U[[node * 4, node * 4 + 1, node * 4 + 2]] += vec_u
                     vec_U_d = vec_U[dirichlet_dofs_U]
-                    mat_K_f_dU = self.mat_K[self.free_dofs, dirichlet_dofs_U]
-                    self.vec_F_f -= np.dot(mat_K_f_dU, vec_U_d)
+                    mat_K_f_dU = self.mat_K[self.free_dofs, :][:, dirichlet_dofs_U]
+                    self.vec_F_f -= mat_K_f_dU @ vec_U_d
             if self.dict_dirichlet_T is not None and self.mat_K is not None:
                 for tag, T in self.dict_dirichlet_T.items():
                     dirichlet_nodes_T = self.mesh.dict_tri_groups[tag].flatten()
@@ -184,6 +184,6 @@ class Model:
                         dirichlet_dofs_T.append(node * 4 + 3)
                         vec_T[node * 4 + 3] += T
                     vec_T_d = vec_T[dirichlet_dofs_T]
-                    mat_K_f_dT = self.mat_K[self.free_dofs, dirichlet_dofs_T]
-                    self.vec_F_f -= np.dot(mat_K_f_dT, vec_T_d)
+                    mat_K_f_dT = self.mat_K[self.free_dofs, :][:, dirichlet_dofs_T]
+                    self.vec_F_f -= mat_K_f_dT @ vec_T_d
         self.clear_full_matvec()
