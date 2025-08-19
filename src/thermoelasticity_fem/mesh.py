@@ -1,6 +1,8 @@
 import meshio
 import numpy as np
 
+from elements import Element
+
 
 class Mesh:
     def __init__(self):
@@ -45,7 +47,15 @@ class Mesh:
         self.dict_materials = dict_materials
 
     def make_elements(self):
-        """"""
+        element_num = 0
+        for tag, table_tets in self.dict_tet_groups.items():
+            material = self.dict_materials[tag]
+            for i in range(table_tets.shape[0]):
+                nodes_nums = table_tets[i, :]
+                nodes_coords = self.table_nodes[nodes_nums, :]
+                element = Element(element_num, material, nodes_nums, nodes_coords)
+                self.elements.append(element)
+                element_num += 1
 
     def make_meshio_mesh(self):
         tets = []
