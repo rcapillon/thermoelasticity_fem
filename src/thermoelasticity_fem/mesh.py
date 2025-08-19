@@ -1,7 +1,7 @@
 import meshio
 import numpy as np
 
-from elements import Element
+from thermoelasticity_fem.elements import Element
 
 
 class Mesh:
