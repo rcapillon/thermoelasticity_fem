@@ -10,7 +10,7 @@ class Model:
         self.mesh = mesh
 
         self.dict_dirichlet_U = dict_dirichlet_U
-        self.dict_nodal_forces= dict_nodal_forces
+        self.dict_nodal_forces = dict_nodal_forces
         self.dict_surface_forces = dict_surface_forces
         self.dict_volume_forces = dict_volume_forces
 
