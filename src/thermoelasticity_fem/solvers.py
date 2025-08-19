@@ -19,16 +19,18 @@ class LinearThermoStatics:
         vec_X_f = spsolve(self.model.mat_K_f_f, self.model.vec_F_f)
         self.X = np.zeros((self.model.mesh.n_dofs, ))
         self.X[self.model.free_dofs] = vec_X_f
-        for tag, vec_u in self.model.dict_dirichlet_U.items():
-            dirichlet_nodes_U = self.model.mesh.dict_tri_groups[tag].flatten()
-            dirichlet_nodes_U = list(set(dirichlet_nodes_U))
-            for node in dirichlet_nodes_U:
-                self.X[[node * 4, node * 4 + 1, node * 4 + 2]] += vec_u
-        for tag, T in self.model.dict_dirichlet_T.items():
-            dirichlet_nodes_T = self.model.mesh.dict_tri_groups[tag].flatten()
-            dirichlet_nodes_T = list(set(dirichlet_nodes_T))
-            for node in dirichlet_nodes_T:
-                self.X[node * 4 + 3] += T
+        if self.model.dict_dirichlet_U is not None:
+            for tag, vec_u in self.model.dict_dirichlet_U.items():
+                dirichlet_nodes_U = self.model.mesh.dict_tri_groups[tag].flatten()
+                dirichlet_nodes_U = list(set(dirichlet_nodes_U))
+                for node in dirichlet_nodes_U:
+                    self.X[[node * 4, node * 4 + 1, node * 4 + 2]] += vec_u
+        if self.model.dict_dirichlet_T is not None:
+            for tag, T in self.model.dict_dirichlet_T.items():
+                dirichlet_nodes_T = self.model.mesh.dict_tri_groups[tag].flatten()
+                dirichlet_nodes_T = list(set(dirichlet_nodes_T))
+                for node in dirichlet_nodes_T:
+                    self.X[node * 4 + 3] += T
 
         self.displacement = np.zeros((self.model.mesh.n_nodes * 3, ))
         self.displacement[::3] = self.X[::4]
