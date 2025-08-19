@@ -2,5 +2,5 @@
 biblio/
 # exclude some files
 TODO.txt
-sandwich.geo
+*.geo
 *.png
