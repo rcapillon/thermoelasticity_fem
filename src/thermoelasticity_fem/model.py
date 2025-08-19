@@ -149,5 +149,28 @@ class Model:
             self.mat_K_f_f = self.mat_K[self.free_dofs, self.free_dofs]
         if self.vec_F is not None:
             self.vec_F_f = self.vec_F[self.free_dofs]
-            # TODO: put Dirichlet conditions (U & T) in vec_F_f
-        # TODO: clear full matrices and vector after
+            if self.dict_dirichlet_U is not None and self.mat_K is not None:
+                for tag, vec_u in self.dict_dirichlet_U.items():
+                    dirichlet_nodes_U = self.mesh.dict_tri_groups[tag].flatten()
+                    dirichlet_nodes_U = list(set(dirichlet_nodes_U))
+                    vec_U = np.zeros((self.mesh.n_dofs, ))
+                    dirichlet_dofs_U = []
+                    for node in dirichlet_nodes_U:
+                        dirichlet_dofs_U.extend([node * 4, node * 4 + 1, node * 4 + 2])
+                        vec_U[[node * 4, node * 4 + 1, node * 4 + 2]] += vec_U
+                    vec_U_d = vec_U[dirichlet_dofs_U]
+                    mat_K_f_dU = self.mat_K[self.free_dofs, dirichlet_dofs_U]
+                    self.vec_F_f -= np.dot(mat_K_f_dU, vec_U_d)
+            if self.dict_dirichlet_T is not None and self.mat_K is not None:
+                for tag, T in self.dict_dirichlet_T.items():
+                    dirichlet_nodes_T = self.mesh.dict_tri_groups[tag].flatten()
+                    dirichlet_nodes_T = list(set(dirichlet_nodes_T))
+                    vec_T = np.zeros((self.mesh.n_dofs,))
+                    dirichlet_dofs_T = []
+                    for node in dirichlet_nodes_T:
+                        dirichlet_dofs_T.append(node * 4 + 3)
+                        vec_T[node * 4 + 3] += T
+                    vec_T_d = vec_T[dirichlet_dofs_T]
+                    mat_K_f_dT = self.mat_K[self.free_dofs, dirichlet_dofs_T]
+                    self.vec_F_f -= np.dot(mat_K_f_dT, vec_T_d)
+        self.clear_full_matvec()
