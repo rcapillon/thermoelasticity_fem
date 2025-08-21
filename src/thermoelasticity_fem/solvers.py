@@ -2,7 +2,7 @@ import numpy as np
 from scipy.sparse.linalg import spsolve
 
 
-class LinearThermoStatics:
+class LinearSteadyState:
     def __init__(self, model):
         self.model = model
 
