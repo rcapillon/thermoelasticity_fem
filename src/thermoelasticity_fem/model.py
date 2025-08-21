@@ -129,7 +129,7 @@ class Model:
                     X13 = X3 - X1
                     area = 0.5 * np.abs(np.dot(X12, X13))
                     for node in nodes:
-                        self.vec_F[node * 4 + 3] += area * q / 3
+                        self.vec_F[node * 4 + 3] -= area * q / 3
         # Heat source
         if self.dict_heat_source is not None:
             for tag, rhoR in self.dict_heat_source.items():
