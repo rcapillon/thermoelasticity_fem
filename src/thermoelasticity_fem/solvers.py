@@ -95,6 +95,7 @@ class LinearTransient:
 
         self.X[:, 0] = prev_X
         self.Xdot[:, 0] = prev_Xdot
+        # initial acceleration is assumed to be zero
 
         if self.model.dict_dirichlet_U is not None:
             for tag, vec_u in self.model.dict_dirichlet_U.items():
@@ -123,3 +124,48 @@ class LinearTransient:
         mat_Kdyn_f_f = (self.model.mat_M_f_f
                         + self.gamma * self.dt * self.model.mat_D_f_f
                         + self.beta * (self.dt ** 2) * self.model.mat_K_f_f)
+
+        for i in range(1, self.n_t):
+            rhs = (self.model.vec_F_f
+                   - self.model.mat_D_f_f @ (prev_Xdot_f + (1 - self.gamma) * self.dt * prev_Xdotdot_f)
+                   - self.model.mat_K_f_f @ (prev_X_f + self.dt * prev_Xdot_f
+                                             + 0.5 * (self.dt ** 2) * (1 - 2 * self.beta) * prev_Xdotdot_f))
+
+            new_Xdotdot_f = spsolve(mat_Kdyn_f_f, rhs)
+            new_Xdot_f = (prev_Xdot_f
+                          + (1 - self.gamma) * self.dt * prev_Xdotdot_f
+                          + self.gamma * self.dt * new_Xdotdot_f)
+            new_X_f = (prev_X_f
+                       + self.dt * prev_Xdot_f
+                       + 0.5 * (self.dt ** 2) * ((1 - 2 * self.beta) * prev_Xdotdot_f + 2 * self.beta * new_Xdotdot_f))
+
+            self.X[self.model.free_dofs, i] = new_X_f
+            self.Xdot[self.model.free_dofs, i] = new_Xdot_f
+            self.Xdotdot[self.model.free_dofs, i] = new_Xdotdot_f
+
+            prev_X_f = new_X_f
+            prev_Xdot_f = new_Xdot_f
+            prev_Xdotdot_f = new_Xdotdot_f
+
+        self.U = np.zeros((self.model.mesh.n_nodes * 3, self.n_t))
+        self.Udot = np.zeros((self.model.mesh.n_nodes * 3, self.n_t))
+        self.Udotdot = np.zeros((self.model.mesh.n_nodes * 3, self.n_t))
+        self.T = np.zeros((self.model.mesh.n_nodes, self.n_t))
+        self.Tdot = np.zeros((self.model.mesh.n_nodes, self.n_t))
+        self.Tdotdot = np.zeros((self.model.mesh.n_nodes, self.n_t))
+
+        self.U[::3, :] = self.X[::4, :]
+        self.U[1::3, :] = self.X[1::4, :]
+        self.U[2::3, :] = self.X[2::4, :]
+
+        self.Udot[::3, :] = self.Xdot[::4, :]
+        self.Udot[1::3, :] = self.Xdot[1::4, :]
+        self.Udot[2::3, :] = self.Xdot[2::4, :]
+
+        self.Udotdot[::3, :] = self.Xdotdot[::4, :]
+        self.Udotdot[1::3, :] = self.Xdotdot[1::4, :]
+        self.Udotdot[2::3, :] = self.Xdotdot[2::4, :]
+
+        self.T = self.X[3::4, :]
+        self.Tdot = self.Xdot[3::4, :]
+        self.Tdotdot = self.Xdotdot[3::4, :]
