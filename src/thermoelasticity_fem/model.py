@@ -6,7 +6,8 @@ class Model:
     def __init__(self, mesh,
                  dict_dirichlet_U=None, dict_dirichlet_T=None,
                  dict_nodal_forces=None, dict_surface_forces=None, dict_volume_forces=None,
-                 dict_heat_flux=None, dict_heat_source=None):
+                 dict_heat_flux=None, dict_heat_source=None,
+                 alpha_M=0., alpha_K=0.):
         self.mesh = mesh
 
         self.dict_dirichlet_U = dict_dirichlet_U
@@ -17,6 +18,9 @@ class Model:
         self.dict_dirichlet_T = dict_dirichlet_T
         self.dict_heat_flux = dict_heat_flux
         self.dict_heat_source = dict_heat_source
+
+        self.alpha_M = alpha_M
+        self.alpha_K = alpha_K
 
         self.free_dofs = None
 
@@ -75,6 +79,12 @@ class Model:
             self.mat_D[np.ix_(element.dofs_nums_t, element.dofs_nums_u)] += mat_Dtu_e
             mat_Dtt_e = element.compute_mat_Dtt_e()
             self.mat_D[np.ix_(element.dofs_nums_t, element.dofs_nums_t)] += mat_Dtt_e
+            if self.alpha_M != 0.:
+                mat_Muu_e = element.compute_mat_Muu_e()
+                self.mat_D[np.ix_(element.dofs_nums_u, element.dofs_nums_u)] += self.alpha_M * mat_Muu_e
+            if self.alpha_K != 0.:
+                mat_Kuu_e = element.compute_mat_Kuu_e()
+                self.mat_D[np.ix_(element.dofs_nums_u, element.dofs_nums_u)] += self.alpha_K * mat_Kuu_e
         self.mat_D = csc_array(self.mat_D)
 
     def assemble_F(self):
