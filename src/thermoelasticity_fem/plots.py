@@ -42,7 +42,7 @@ def animate_U_T(mesh, temperature, displacement, vec_t, save_path, fps=10, quali
         # interpolate_before_map=False
     )
     p.show_axes()
-    p.add_title(f't = {vec_t[0]:.1f} s')
+    p.add_title(f't = {vec_t[0]:.3f} s')
     p.write_frame()
 
     for i in range(1, vec_t.size):
@@ -61,7 +61,7 @@ def animate_U_T(mesh, temperature, displacement, vec_t, save_path, fps=10, quali
             # interpolate_before_map=False
         )
         p.show_axes()
-        p.add_title(f't = {vec_t[i]:.1f} s')
+        p.add_title(f't = {vec_t[i]:.3f} s')
         p.write_frame()
 
     p.close()
