@@ -80,13 +80,13 @@ class Model:
     def assemble_F(self):
         self.vec_F = np.zeros((self.mesh.n_dofs, ))
 
-        # Nodal forces
+        # Nodal forces (in N)
         if self.dict_nodal_forces is not None:
             for tag, vec_f in self.dict_nodal_forces.items():
                 nodes = self.mesh.dict_nodes_groups[tag]
                 for node in nodes:
                     self.vec_F[(node * 4):(node * 4 + 3)] += vec_f
-        # Surface forces
+        # Surface forces (in N/m^2)
         if self.dict_surface_forces is not None:
             for tag, vec_f in self.dict_surface_forces.items():
                 table_tri = self.mesh.dict_tri_groups[tag]
@@ -116,7 +116,7 @@ class Model:
                     volume = np.abs(np.dot(X14, np.cross(X13, X12))) / 6
                     for node in nodes:
                         self.vec_F[(node * 4):(node * 4 + 3)] += volume * vec_f / 4
-        # Heat flux
+        # Heat flux (in W/m^2)
         if self.dict_heat_flux is not None:
             for tag, q in self.dict_heat_flux.items():
                 table_tri = self.mesh.dict_tri_groups[tag]
