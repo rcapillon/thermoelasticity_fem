@@ -9,7 +9,7 @@ import pyvista as pv
 from thermoelasticity_fem.materials import LinearThermoElastic
 from thermoelasticity_fem.mesh import Mesh
 from thermoelasticity_fem.model import Model
-from thermoelasticity_fem.solvers import LinearThermoStatics
+from thermoelasticity_fem.solvers import LinearSteadyState
 
 
 if __name__ == '__main__':
@@ -34,11 +34,11 @@ if __name__ == '__main__':
 
     T_dir1 = 20.
     T_dir2 = 20.
-    T_dir3 = 40.
+    # T_dir3 = 40.
     dict_dirichlet_T = {
         4: T_dir1,
         5: T_dir2,
-        7: T_dir3
+        # 7: T_dir3
     }
     # dict_dirichlet_T = None
 
@@ -48,7 +48,7 @@ if __name__ == '__main__':
     }
     # dict_surface_forces = None
 
-    q = -250.
+    q = -25.
     dict_heat_flux = {
         6: q,
     }
@@ -66,7 +66,7 @@ if __name__ == '__main__':
                   dict_surface_forces=dict_surface_forces,
                   dict_heat_flux=dict_heat_flux, dict_heat_source=dict_heat_source)
 
-    solver = LinearThermoStatics(model)
+    solver = LinearSteadyState(model)
     solver.solve()
 
     ####
