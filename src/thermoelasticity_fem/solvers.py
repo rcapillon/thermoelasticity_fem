@@ -76,6 +76,13 @@ class LinearTransient:
         self.Tdotdot = None
 
     def solve(self):
+        self.model.create_free_dofs_lists()
+        self.model.assemble_M()
+        self.model.assemble_K()
+        self.model.assemble_D()
+        self.model.assemble_F()
+        self.model.apply_dirichlet()
+
         prev_X = np.zeros((self.model.mesh.n_dofs, ))
         prev_Xdot = np.zeros((self.model.mesh.n_dofs, ))
         prev_Xdotdot = np.zeros((self.model.mesh.n_dofs, ))
@@ -114,13 +121,6 @@ class LinearTransient:
         prev_X_f = prev_X[self.model.free_dofs]
         prev_Xdot_f = prev_Xdot[self.model.free_dofs]
         prev_Xdotdot_f = prev_Xdotdot[self.model.free_dofs]
-
-        self.model.create_free_dofs_lists()
-        self.model.assemble_M()
-        self.model.assemble_K()
-        self.model.assemble_D()
-        self.model.assemble_F()
-        self.model.apply_dirichlet()
 
         mat_Kdyn_f_f = (self.model.mat_M_f_f
                         + self.gamma * self.dt * self.model.mat_D_f_f
