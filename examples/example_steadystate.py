@@ -4,12 +4,12 @@ import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), '../src'))
 
 import numpy as np
-import pyvista as pv
 
 from thermoelasticity_fem.materials import LinearThermoElastic
 from thermoelasticity_fem.mesh import Mesh
 from thermoelasticity_fem.model import Model
 from thermoelasticity_fem.solvers import LinearSteadyState
+from thermoelasticity_fem.plots import plot_U_T
 
 
 if __name__ == '__main__':
@@ -72,14 +72,4 @@ if __name__ == '__main__':
     ####
     # Interactive plot (deformed mesh, temperature as color)
 
-    mio_mesh = mesh.make_meshio_mesh()
-
-    p = pv.Plotter()
-    pv_mesh = pv.from_meshio(mio_mesh)
-    pv_mesh.point_data['T'] = solver.temperature
-    pv_mesh.set_active_scalars('T')
-    pv_mesh['U'] = solver.displacement.reshape((mesh.n_nodes, 3))
-    warped_mesh = pv_mesh.warp_by_vector('U', factor=1.)
-    p.add_mesh(warped_mesh, show_edges=True)
-    p.show_axes()
-    p.show()
+    plot_U_T(solver.model.mesh, solver.T, solver.U)
