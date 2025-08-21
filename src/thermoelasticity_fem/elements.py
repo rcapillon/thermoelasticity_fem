@@ -235,7 +235,7 @@ class Element:
 
         for i, (_, gauss_weight) in enumerate(gauss):
             mat_divu = np.dot(mat_P_divu, np.dot(mat_invJtJtJt, mat_Du_e_gauss))
-            mat_Dtu_e += (gauss_weight * det_J * self.material.beta * self.material.T0 *
+            mat_Dtu_e -= (gauss_weight * det_J * self.material.beta * self.material.T0 *
                           np.dot(list_mat_Et_e_gauss[i].T, mat_divu))
 
         return mat_Dtu_e
@@ -269,7 +269,7 @@ class Element:
         mat_grad_t = np.dot(mat_invJt, mat_Dt_e_gauss)
 
         for i, (_, gauss_weight) in enumerate(gauss):
-            mat_Kut_e += (gauss_weight * det_J * self.material.beta *
+            mat_Kut_e -= (gauss_weight * det_J * self.material.beta *
                           np.dot(list_mat_Eu_e_gauss[i].T, mat_grad_t))
 
         return mat_Kut_e
