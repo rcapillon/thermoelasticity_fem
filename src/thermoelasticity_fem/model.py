@@ -100,7 +100,7 @@ class Model:
                     area = 0.5 * np.abs(np.dot(X12, X13))
                     for node in nodes:
                         self.vec_F[(node * 4):(node * 4 + 3)] += area * vec_f / 3
-        # Volume forces
+        # Volume forces (in N/m^3)
         if self.dict_volume_forces is not None:
             for tag, vec_f in self.dict_volume_forces.items():
                 table_tet = self.mesh.dict_tet_groups[tag]
@@ -130,9 +130,9 @@ class Model:
                     area = 0.5 * np.abs(np.dot(X12, X13))
                     for node in nodes:
                         self.vec_F[node * 4 + 3] -= area * q / 3
-        # Heat source
+        # Heat source (in W/m^3)
         if self.dict_heat_source is not None:
-            for tag, rhoR in self.dict_heat_source.items():
+            for tag, R in self.dict_heat_source.items():
                 table_tet = self.mesh.dict_tet_groups[tag]
                 for i in range(table_tet.shape[0]):
                     nodes = table_tet[i, :]
@@ -145,7 +145,7 @@ class Model:
                     X14 = X4 - X1
                     volume = np.abs(np.dot(X14, np.cross(X13, X12))) / 6
                     for node in nodes:
-                        self.vec_F[node * 4 + 3] += volume * rhoR / 4
+                        self.vec_F[node * 4 + 3] += volume * R / 4
 
     def clear_full_matvec(self):
         self.mat_M = None
