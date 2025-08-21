@@ -64,13 +64,17 @@ if __name__ == '__main__':
     # }
     dict_heat_source = None
 
+    alpha_M = 2e-1
+    alpha_K = 2e-1
+
     model = Model(mesh,
                   dict_dirichlet_U=dict_dirichlet_U, dict_dirichlet_T=dict_dirichlet_T,
                   dict_surface_forces=dict_surface_forces,
-                  dict_heat_flux=dict_heat_flux, dict_heat_source=dict_heat_source)
+                  dict_heat_flux=dict_heat_flux, dict_heat_source=dict_heat_source,
+                  alpha_M=alpha_M, alpha_K=alpha_K)
 
     t_end = 1e0
-    n_t = int(1e3)
+    n_t = int(1e2)
     gamma = 1/2
     beta = 1/4
     initial_U = np.zeros((model.mesh.n_nodes * 3, ))
@@ -87,4 +91,4 @@ if __name__ == '__main__':
     save_path = './test_animation.mp4'
     animate_U_T(solver.model.mesh, solver.T, solver.U, solver.vec_t, save_path,
                 amplification_factor_U=amplification_factor_U,
-                fps=100, quality=5)
+                fps=25, quality=5)
