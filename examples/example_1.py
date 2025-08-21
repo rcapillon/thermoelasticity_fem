@@ -6,7 +6,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '../src'))
 import numpy as np
 import pyvista as pv
 
-from thermoelasticity_fem.materials import glass_SG773
+from thermoelasticity_fem.materials import LinearThermoElastic
 from thermoelasticity_fem.mesh import Mesh
 from thermoelasticity_fem.model import Model
 from thermoelasticity_fem.solvers import LinearThermoStatics
@@ -16,7 +16,7 @@ if __name__ == '__main__':
     mesh = Mesh()
     mesh.load_mesh('../data/sandwich.msh')
 
-    material = glass_SG773
+    material = LinearThermoElastic(rho=2300, Y=64e9, nu=0.1, k=1., c=750., alpha=4e-6, T0=20.)
     dict_materials = {
         1: material,
         2: material,
@@ -34,7 +34,7 @@ if __name__ == '__main__':
 
     T_dir1 = 20.
     T_dir2 = 20.
-    T_dir3 = 50.
+    T_dir3 = 40.
     dict_dirichlet_T = {
         4: T_dir1,
         5: T_dir2,
@@ -48,9 +48,9 @@ if __name__ == '__main__':
     }
     # dict_surface_forces = None
 
-    q = 250.
+    q = -250.
     dict_heat_flux = {
-        6: q
+        6: q,
     }
     # dict_heat_flux = None
 
