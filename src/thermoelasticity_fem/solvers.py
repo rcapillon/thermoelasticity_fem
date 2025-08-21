@@ -10,8 +10,8 @@ class LinearSteadyState:
         self.model = model
 
         self.X = None
-        self.displacement = None
-        self.temperature = None
+        self.U = None
+        self.T = None
 
     def solve(self):
         self.model.create_free_dofs_lists()
@@ -35,11 +35,11 @@ class LinearSteadyState:
                 for node in dirichlet_nodes_T:
                     self.X[node * 4 + 3] = T
 
-        self.displacement = np.zeros((self.model.mesh.n_nodes * 3, ))
-        self.displacement[::3] = self.X[::4]
-        self.displacement[1::3] = self.X[1::4]
-        self.displacement[2::3] = self.X[2::4]
-        self.temperature = self.X[3::4]
+        self.U = np.zeros((self.model.mesh.n_nodes * 3, ))
+        self.U[::3] = self.X[::4]
+        self.U[1::3] = self.X[1::4]
+        self.U[2::3] = self.X[2::4]
+        self.T = self.X[3::4]
 
 
 class LinearTransient:
