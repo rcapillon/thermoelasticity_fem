@@ -1,5 +1,6 @@
 import numpy as np
 from scipy.sparse.linalg import spsolve
+from tqdm import tqdm
 
 
 class LinearSteadyState:
@@ -125,7 +126,7 @@ class LinearTransient:
                         + self.gamma * self.dt * self.model.mat_D_f_f
                         + self.beta * (self.dt ** 2) * self.model.mat_K_f_f)
 
-        for i in range(1, self.n_t):
+        for i in tqdm(range(1, self.n_t)):
             rhs = (self.model.vec_F_f
                    - self.model.mat_D_f_f @ (prev_Xdot_f + (1 - self.gamma) * self.dt * prev_Xdotdot_f)
                    - self.model.mat_K_f_f @ (prev_X_f + self.dt * prev_Xdot_f
