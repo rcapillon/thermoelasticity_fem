@@ -3,7 +3,8 @@ A Finite Element solver for classical linear thermoelasticity in Python
 
 **Important note**: This repository has just recently been made public. It is uncommented, without documentation and 
 possibly still bugged. For now, users are incited to read the example scripts in order to make their own. There is a 
-steady-state and a transient example, showcasing respectively the two available solvers.
+steady-state and a transient example, showcasing respectively the two available solvers. The mesh used in examples is 
+described in terms of tagged nodes, surfaces and volumes in the folder data/sandwich.txt
 
 ## Bibliography
 [1] Balla, M. “Formulation of coupled problems of thermoelasticity by finite elements", 
