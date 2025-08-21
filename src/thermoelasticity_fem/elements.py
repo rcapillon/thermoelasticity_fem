@@ -145,7 +145,7 @@ def compute_mat_Du_e():
 def compute_mat_Et_e(reference_coords):
     mat_Et_e = np.zeros((1, 4))
     for i in range(4):
-        mat_Et_e[i] = shapefun_value(i, reference_coords)
+        mat_Et_e[0, i] = shapefun_value(i, reference_coords)
 
     return mat_Et_e
 
@@ -168,7 +168,7 @@ for i in range(n_gauss):
     gauss_point_i = gauss[i][0]
     mat_Eu_e_i = compute_mat_Eu_e(gauss_point_i)
     list_mat_Eu_e_gauss.append(mat_Eu_e_i)
-    mat_Et_e_i = compute_mat_Eu_e(gauss_point_i)
+    mat_Et_e_i = compute_mat_Et_e(gauss_point_i)
     list_mat_Et_e_gauss.append(mat_Et_e_i)
 
 mat_Du_e_gauss = compute_mat_Du_e()
