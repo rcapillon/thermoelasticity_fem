@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import pyvista as pv
 
 
-def plot_U_T(mesh, temperature, displacement):
+def plot_U_T(mesh, temperature, displacement, amplification_factor_U=1.):
     mio_mesh = mesh.make_meshio_mesh()
 
     p = pv.Plotter()
@@ -11,13 +11,13 @@ def plot_U_T(mesh, temperature, displacement):
     pv_mesh.point_data['T'] = temperature
     pv_mesh.set_active_scalars('T')
     pv_mesh['U'] = displacement.reshape((mesh.n_nodes, 3))
-    warped_mesh = pv_mesh.warp_by_vector('U', factor=1.)
+    warped_mesh = pv_mesh.warp_by_vector('U', factor=amplification_factor_U)
     p.add_mesh(warped_mesh, show_edges=True)
     p.show_axes()
     p.show()
 
 
-def animate_U_T(mesh, temperature, displacement, vec_t, save_path, fps=10, quality=5):
+def animate_U_T(mesh, temperature, displacement, vec_t, save_path, amplification_factor_U=1., fps=10, quality=5):
     mio_mesh = mesh.make_meshio_mesh()
 
     val_min = np.amin(temperature.flatten())
@@ -32,7 +32,7 @@ def animate_U_T(mesh, temperature, displacement, vec_t, save_path, fps=10, quali
     pv_mesh.point_data['T'] = temperature[:, 0]
     pv_mesh.set_active_scalars('T')
     pv_mesh['U'] = displacement[:, 0].reshape((mesh.n_nodes, 3))
-    warped_mesh = pv_mesh.warp_by_vector('U', factor=1.)
+    warped_mesh = pv_mesh.warp_by_vector('U', factor=amplification_factor_U)
     actor = p.add_mesh(
         warped_mesh,
         cmap=cmap,
@@ -51,7 +51,7 @@ def animate_U_T(mesh, temperature, displacement, vec_t, save_path, fps=10, quali
         pv_mesh.point_data['T'] = temperature[:, i]
         pv_mesh.set_active_scalars('T')
         pv_mesh['U'] = displacement[:, i].reshape((mesh.n_nodes, 3))
-        warped_mesh = pv_mesh.warp_by_vector('U', factor=1.)
+        warped_mesh = pv_mesh.warp_by_vector('U', factor=amplification_factor_U)
         actor = p.add_mesh(
             warped_mesh,
             cmap=cmap,
