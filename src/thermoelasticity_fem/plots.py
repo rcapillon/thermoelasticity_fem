@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import pyvista as pv
 
 
-def plot_U_T(mesh, temperature, displacement, amplification_factor_U=1.):
+def plot_U_T(mesh, temperature, displacement, amplification_factor_U=1., save_path=None):
     mio_mesh = mesh.make_meshio_mesh()
 
     p = pv.Plotter()
@@ -15,6 +15,12 @@ def plot_U_T(mesh, temperature, displacement, amplification_factor_U=1.):
     p.add_mesh(warped_mesh, show_edges=True)
     p.show_axes()
     p.show()
+
+    if save_path is not None:
+        fig, ax = plt.subplots()
+        ax.axis('off')
+        ax.imshow(p.image)
+        plt.savefig(save_path)
 
 
 def animate_U_T(mesh, temperature, displacement, vec_t, save_path, amplification_factor_U=1., fps=10, quality=5):
