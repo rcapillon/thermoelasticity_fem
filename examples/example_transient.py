@@ -51,6 +51,14 @@ if __name__ == '__main__':
     }
     # dict_surface_forces = None
 
+    # vec_f_vol = np.array([0., 0., -material.rho * 9.81])
+    # dict_volume_forces = {
+    #     1: vec_f_vol,
+    #     2: vec_f_vol,
+    #     3: vec_f_vol
+    # }
+    dict_volume_forces = None
+
     q = -1e4
     dict_heat_flux = {
         6: q,
@@ -69,7 +77,7 @@ if __name__ == '__main__':
 
     model = Model(mesh,
                   dict_dirichlet_U=dict_dirichlet_U, dict_dirichlet_T=dict_dirichlet_T,
-                  dict_surface_forces=dict_surface_forces,
+                  dict_surface_forces=dict_surface_forces, dict_volume_forces=dict_volume_forces,
                   dict_heat_flux=dict_heat_flux, dict_heat_source=dict_heat_source,
                   alpha_M=alpha_M, alpha_K=alpha_K)
 
