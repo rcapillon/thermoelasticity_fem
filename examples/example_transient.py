@@ -88,7 +88,7 @@ if __name__ == '__main__':
     ####
     # Animation (deformed mesh, temperature as color)
     amplification_factor_U = 1e2
-    save_path = './test_animation.mp4'
+    save_path = './transient_animation.mp4'
     animate_U_T(solver.model.mesh, solver.T, solver.U, solver.vec_t, save_path,
                 amplification_factor_U=amplification_factor_U,
                 fps=25, quality=5)
