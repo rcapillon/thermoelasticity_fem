@@ -17,7 +17,7 @@ if __name__ == '__main__':
     mesh.load_mesh('../data/sandwich.msh')
 
     # fictive material
-    material = LinearThermoElastic(rho=2300, Y=64e9, nu=0.1, k=1e6, c=750e-6, alpha=4e-6, T0=20.)
+    material = LinearThermoElastic(rho=2300, Y=64e9, nu=0.1, k=1e3, c=500e-3, alpha=4e-6, T0=20.)
     dict_materials = {
         1: material,
         2: material,
@@ -45,13 +45,13 @@ if __name__ == '__main__':
     }
     # dict_dirichlet_T = None
 
-    vec_f_surf = np.array([0., 0., 1e9])
+    vec_f_surf = np.array([0., 0., 1e7])
     dict_surface_forces = {
         7: vec_f_surf
     }
     # dict_surface_forces = None
 
-    q = -5e6
+    q = -1e4
     dict_heat_flux = {
         6: q,
     }
@@ -69,7 +69,7 @@ if __name__ == '__main__':
                   dict_surface_forces=dict_surface_forces,
                   dict_heat_flux=dict_heat_flux, dict_heat_source=dict_heat_source)
 
-    t_end = 0.05
+    t_end = 1e0
     n_t = int(1e3)
     gamma = 1/2
     beta = 1/4
@@ -83,5 +83,8 @@ if __name__ == '__main__':
 
     ####
     # Animation (deformed mesh, temperature as color)
+    amplification_factor_U = 1e2
     save_path = './test_animation.mp4'
-    animate_U_T(solver.model.mesh, solver.T, solver.U, solver.vec_t, save_path, fps=100, quality=5)
+    animate_U_T(solver.model.mesh, solver.T, solver.U, solver.vec_t, save_path,
+                amplification_factor_U=amplification_factor_U,
+                fps=100, quality=5)
