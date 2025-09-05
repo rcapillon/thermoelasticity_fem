@@ -363,3 +363,23 @@ class Model:
         mat_Ktt = self.mat_K[self.free_dofs_theta, :][:, self.free_dofs_theta]
 
         _, self.mat_phi_t = eigs(mat_Ktt, k=self.n_q_t, M=mat_Dtt)
+
+    def compute_ROM(self):
+        # must have already called methods compute_ROB_u and compute_ROB_theta and have global finite element matrices
+        # M, D, K as well as vector F assembled with Dirichlet conditions applied
+
+        mat_Mrom_uu = (self.mat_phi_u.transpose() @ self.mat_M[self.free_dofs_U, :][:, self.free_dofs_U]
+                       @ self.mat_phi_u)
+        mat_Drom_uu = (self.mat_phi_u.transpose() @ self.mat_D[self.free_dofs_U, :][:, self.free_dofs_U]
+                       @ self.mat_phi_u)
+        mat_Drom_tu = (self.mat_phi_t.transpose() @ self.mat_D[self.free_dofs_theta, :][:, self.free_dofs_U]
+                       @ self.mat_phi_u)
+        mat_Drom_tt = (self.mat_phi_t.transpose() @ self.mat_D[self.free_dofs_theta, :][:, self.free_dofs_theta]
+                       @ self.mat_phi_t)
+        mat_Krom_uu = (self.mat_phi_u.transpose() @ self.mat_K[self.free_dofs_U, :][:, self.free_dofs_U]
+                       @ self.mat_phi_u)
+        mat_Krom_ut = (self.mat_phi_u.transpose() @ self.mat_K[self.free_dofs_U, :][:, self.free_dofs_theta]
+                       @ self.mat_phi_t)
+        mat_Krom_tt = (self.mat_phi_t.transpose() @ self.mat_K[self.free_dofs_theta, :][:, self.free_dofs_theta]
+                       @ self.mat_phi_t)
+        vec_From_u = self.mat_phi_u.transpose() @ self.vec_F[]
