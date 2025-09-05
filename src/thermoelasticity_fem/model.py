@@ -1,5 +1,6 @@
 import numpy as np
 from scipy.sparse import csc_array
+from scipy.sparse.linalg import eigs
 
 
 class Model:
@@ -37,6 +38,22 @@ class Model:
         self.mat_D_f_f = None
         self.mat_K_f_f = None
         self.vec_F_f = None
+
+        self.n_q_u = None
+        self.n_q_t = None
+        self.mat_phi_u = None
+        self.mat_phi_t = None
+        self.mat_Mrom_uu = None
+        self.mat_Mrom = None
+        self.mat_Drom_uu = None
+        self.mat_Drom_tu = None
+        self.mat_Drom_tt = None
+        self.mat_Drom = None
+        self.mat_Krom_uu = None
+        self.mat_Krom_ut = None
+        self.mat_Krom_tt = None
+        self.mat_Krom = None
+        self.vec_From = None
 
     def create_free_dofs_lists(self):
         self.dirichlet_dofs_U = []
@@ -326,3 +343,23 @@ class Model:
                     vec_T_d = vec_T[dirichlet_dofs_T]
                     mat_K_f_dT = self.mat_K[self.free_dofs, :][:, dirichlet_dofs_T]
                     self.vec_F_f -= mat_K_f_dT @ vec_T_d
+
+    def compute_ROB_u(self, n_q_u):
+        # must have already called method create_dof_lists and have global finite element matrices M and K assembled
+
+        self.n_q_u = n_q_u
+
+        mat_Muu = self.mat_M[self.free_dofs_U, :][:, self.free_dofs_U]
+        mat_Kuu = self.mat_K[self.free_dofs_U, :][:, self.free_dofs_U]
+
+        _, self.mat_phi_u = eigs(mat_Kuu, k=self.n_q_u, M=mat_Muu)
+
+    def compute_ROB_theta(self, n_q_t):
+        # must have already called method create_dof_lists and have global finite element matrices D and K assembled
+
+        self.n_q_t = n_q_t
+
+        mat_Dtt = self.mat_D[self.free_dofs_theta, :][:, self.free_dofs_theta]
+        mat_Ktt = self.mat_K[self.free_dofs_theta, :][:, self.free_dofs_theta]
+
+        _, self.mat_phi_t = eigs(mat_Ktt, k=self.n_q_t, M=mat_Dtt)
