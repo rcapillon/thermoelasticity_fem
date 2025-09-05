@@ -1,7 +1,7 @@
-# import os
-# import sys
-#
-# sys.path.append(os.path.join(os.path.dirname(__file__), '../src'))
+import os
+import sys
+
+sys.path.append(os.path.join(os.path.dirname(__file__), '../src'))
 
 import numpy as np
 
@@ -26,21 +26,17 @@ if __name__ == '__main__':
     mesh.set_materials(dict_materials)
     mesh.make_elements()
 
-    vec_u_dir1 = np.array([0., 0., 0.])
-    vec_u_dir2 = np.array([0., 0., 0.])
     dict_dirichlet_U = {
-        4: vec_u_dir1,
-        5: vec_u_dir2
+        4: [('x', 0.), ('y', 0.), ('z', 0.)],
+        5: [('x', 0.), ('y', 0.), ('z', 0.)]
     }
 
-    ambient_temperature = 20.
-
-    T_dir1 = ambient_temperature
-    T_dir2 = ambient_temperature
+    theta_dir1 = 0.
+    theta_dir2 = 0.
     # T_dir3 = 40.
-    dict_dirichlet_T = {
-        4: T_dir1,
-        5: T_dir2,
+    dict_dirichlet_theta = {
+        4: theta_dir1,
+        5: theta_dir2,
         # 7: T_dir3
     }
     # dict_dirichlet_T = None
@@ -76,7 +72,7 @@ if __name__ == '__main__':
     alpha_K = 2e-1
 
     model = Model(mesh,
-                  dict_dirichlet_U=dict_dirichlet_U, dict_dirichlet_T=dict_dirichlet_T,
+                  dict_dirichlet_U=dict_dirichlet_U, dict_dirichlet_theta=dict_dirichlet_theta,
                   dict_surface_forces=dict_surface_forces, dict_volume_forces=dict_volume_forces,
                   dict_heat_flux=dict_heat_flux, dict_heat_source=dict_heat_source,
                   alpha_M=alpha_M, alpha_K=alpha_K)
@@ -87,10 +83,10 @@ if __name__ == '__main__':
     beta = 1/4
     initial_U = np.zeros((model.mesh.n_nodes * 3, ))
     initial_Udot = np.zeros((model.mesh.n_nodes * 3, ))
-    initial_T = ambient_temperature * np.ones((model.mesh.n_nodes, ))
-    initial_Tdot = np.zeros((model.mesh.n_nodes, ))
+    initial_theta = np.zeros((model.mesh.n_nodes, ))
+    initial_thetadot = np.zeros((model.mesh.n_nodes, ))
 
-    solver = LinearTransient(model, initial_U, initial_Udot, initial_T, initial_Tdot, t_end, n_t, gamma, beta)
+    solver = LinearTransient(model, initial_U, initial_Udot, initial_theta, initial_thetadot, t_end, n_t, gamma, beta)
     solver.solve()
 
     ####
