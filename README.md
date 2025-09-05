@@ -6,6 +6,18 @@ documentation and possibly still bugged. For now, users are incited to read the 
 own. There is a steady-state and two transient examples, showcasing the two available solvers. The mesh used in examples
 is described in terms of tagged nodes, surfaces and volumes in the folder data/sandwich.txt
 
+## Latest updates
+- Handling of Dirichlet conditions has improved: you can now affect one to a specific DOF, not a whole node. Example
+scripts have been updated accordingly.
+- Time-varying loads have been introduced for the transient solver. A new example script 'example_transient_2.py' 
+showcases that.
+
+## Next developments
+- Reduced-order modeling for the transient solver using elastic and thermal modes. This should speed up transient
+computations with long time-varying loads.
+- Uncertainty modeling: parametric uncertainties for material parameters and nonparametric uncertainties to account for
+model uncertainties.
+
 ## Installation
 Create and/or activate a virtual environment. Clone this repository in the folder of your choosing using:
 ```
