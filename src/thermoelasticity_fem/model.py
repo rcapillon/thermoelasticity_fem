@@ -23,6 +23,10 @@ class Model:
         self.alpha_K = alpha_K
 
         self.free_dofs = None
+        self.free_dofs_U = None
+        self.free_dofs_theta = None
+        self.dirichlet_dofs_U = None
+        self.dirichlet_dofs_theta = None
 
         self.mat_M = None
         self.mat_D = None
@@ -35,7 +39,7 @@ class Model:
         self.vec_F_f = None
 
     def create_free_dofs_lists(self):
-        dirichlet_dofs_U = []
+        self.dirichlet_dofs_U = []
         if self.dict_dirichlet_U is not None:
             for tag, list_dir_u in self.dict_dirichlet_U.items():
                 nodes = list(self.mesh.dict_tri_groups[tag].flatten())
@@ -48,18 +52,26 @@ class Model:
                         modif = 2
                     else:
                         raise ValueError('Unrecognized DOF.')
-                    dirichlet_dofs_U.extend([node * 4 + modif for node in nodes])
-            dirichlet_dofs_U = list(set(dirichlet_dofs_U))
+                    self.dirichlet_dofs_U.extend([node * 4 + modif for node in nodes])
+            self.dirichlet_dofs_U = list(set(self.dirichlet_dofs_U))
         dirichlet_nodes_T = []
         if self.dict_dirichlet_theta is not None:
             for k in self.dict_dirichlet_theta.keys():
                 dirichlet_nodes_T.extend(list(self.mesh.dict_tri_groups[k].flatten()))
             dirichlet_nodes_T = list(set(dirichlet_nodes_T))
-        dirichlet_dofs_T = []
+        self.dirichlet_dofs_theta = []
         for node in dirichlet_nodes_T:
-            dirichlet_dofs_T.append(node * 4 + 3)
-        all_dirichlet_dofs = dirichlet_dofs_U + dirichlet_dofs_T
+            self.dirichlet_dofs_theta.append(node * 4 + 3)
+        all_dirichlet_dofs = self.dirichlet_dofs_U + self.dirichlet_dofs_theta
         self.free_dofs = [dof for dof in range(self.mesh.n_dofs) if dof not in all_dirichlet_dofs]
+        self.free_dofs_U = []
+        self.free_dofs_U.extend([node * 4 for node in range(self.mesh.n_nodes) if node * 4 not in all_dirichlet_dofs])
+        self.free_dofs_U.extend([node * 4 + 1 for node in range(self.mesh.n_nodes)
+                                 if node * 4 + 1 not in all_dirichlet_dofs])
+        self.free_dofs_U.extend([node * 4 + 2 for node in range(self.mesh.n_nodes)
+                                 if node * 4 + 2 not in all_dirichlet_dofs])
+        self.free_dofs_theta.extend([node * 4 + 3 for node in range(self.mesh.n_nodes)
+                                     if node * 4 + 3 not in all_dirichlet_dofs])
 
     def assemble_M(self):
         self.mat_M = np.zeros((self.mesh.n_dofs, self.mesh.n_dofs))
