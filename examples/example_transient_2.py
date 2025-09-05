@@ -23,7 +23,7 @@ if __name__ == '__main__':
     mesh.load_mesh('../data/sandwich.msh')
 
     # fictive material
-    material = LinearThermoElastic(rho=2300, Y=64e9, nu=0.1, k=1e3, c=500e-3, alpha=4e-6, T0=20.)
+    material = LinearThermoElastic(rho=2300, Y=64e9, nu=0.1, k=1., c=1., alpha=4e-6, T0=20.)
     dict_materials = {
         1: material,
         2: material,
@@ -47,7 +47,7 @@ if __name__ == '__main__':
     }
     # dict_dirichlet_T = None
 
-    amplitude_fx = -2e10
+    amplitude_fx = -1e9
     arr_f_surf = np.zeros((3, n_t))
     arr_f_surf[0, :] = np.sin(2 * np.pi * vec_t / 900.) * amplitude_fx
     # vec_f_surf = np.array([amplitude_fx, 0., 0.])
@@ -98,7 +98,7 @@ if __name__ == '__main__':
 
     ####
     # Animation (deformed mesh, temperature as color)
-    amplification_factor_U = 1.
+    amplification_factor_U = 20.
     save_path = './transient_animation_2.mp4'
     animate_U_T(solver.model.mesh, solver.T, solver.U, solver.vec_t, save_path,
                 amplification_factor_U=amplification_factor_U,
