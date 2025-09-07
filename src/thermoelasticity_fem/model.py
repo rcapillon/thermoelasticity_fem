@@ -329,20 +329,20 @@ class Model:
                             dirichlet_dofs_U.append(node * 4 + modif)
                             vec_U[node * 4 + modif] = val_u
                     vec_U_d = vec_U[dirichlet_dofs_U]
-                    mat_K_f_dU = self.mat_K[self.free_dofs, :][:, dirichlet_dofs_U]
-                    self.vec_F_f -= mat_K_f_dU @ vec_U_d
+                    mat_K_f_du = self.mat_K[self.free_dofs, :][:, dirichlet_dofs_U]
+                    self.vec_F_f -= mat_K_f_du @ vec_U_d
             if self.dict_dirichlet_theta is not None and self.mat_K is not None:
-                for tag, T in self.dict_dirichlet_theta.items():
-                    dirichlet_nodes_T = self.mesh.dict_tri_groups[tag].flatten()
-                    dirichlet_nodes_T = list(set(dirichlet_nodes_T))
-                    vec_T = np.zeros((self.mesh.n_dofs,))
-                    dirichlet_dofs_T = []
-                    for node in dirichlet_nodes_T:
-                        dirichlet_dofs_T.append(node * 4 + 3)
-                        vec_T[node * 4 + 3] = T
-                    vec_T_d = vec_T[dirichlet_dofs_T]
-                    mat_K_f_dT = self.mat_K[self.free_dofs, :][:, dirichlet_dofs_T]
-                    self.vec_F_f -= mat_K_f_dT @ vec_T_d
+                for tag, theta in self.dict_dirichlet_theta.items():
+                    dirichlet_nodes_theta = self.mesh.dict_tri_groups[tag].flatten()
+                    dirichlet_nodes_theta = list(set(dirichlet_nodes_theta))
+                    vec_theta = np.zeros((self.mesh.n_dofs,))
+                    dirichlet_dofs_theta = []
+                    for node in dirichlet_nodes_theta:
+                        dirichlet_dofs_theta.append(node * 4 + 3)
+                        vec_theta[node * 4 + 3] = theta
+                    vec_theta_d = vec_theta[dirichlet_dofs_theta]
+                    mat_K_f_dt = self.mat_K[self.free_dofs, :][:, dirichlet_dofs_theta]
+                    self.vec_F_f -= mat_K_f_dt @ vec_theta_d
 
     def compute_ROB_u(self, n_q_u):
         # must have already called method create_dof_lists and have global finite element matrices M and K assembled
@@ -364,9 +364,9 @@ class Model:
 
         _, self.mat_phi_t = eigs(mat_Ktt, k=self.n_q_t, M=mat_Dtt)
 
-    def compute_ROM(self):
+    def compute_ROM_matrices(self):
         # must have already called methods compute_ROB_u and compute_ROB_theta and have global finite element matrices
-        # M, D, K as well as vector F assembled with Dirichlet conditions applied
+        # M, D, K assembled
 
         mat_Mrom_uu = (self.mat_phi_u.transpose() @ self.mat_M[self.free_dofs_U, :][:, self.free_dofs_U]
                        @ self.mat_phi_u)
@@ -382,4 +382,61 @@ class Model:
                        @ self.mat_phi_t)
         mat_Krom_tt = (self.mat_phi_t.transpose() @ self.mat_K[self.free_dofs_theta, :][:, self.free_dofs_theta]
                        @ self.mat_phi_t)
-        vec_From_u = self.mat_phi_u.transpose() @ self.vec_F[]
+
+        self.mat_Mrom = np.zeros((self.n_q_u + self.n_q_t, self.n_q_u + self.n_q_t))
+        self.mat_Mrom[:self.n_q_u, :self.n_q_u] = mat_Mrom_uu
+        self.mat_Drom = np.zeros((self.n_q_u + self.n_q_t, self.n_q_u + self.n_q_t))
+        self.mat_Drom[:self.n_q_u, :self.n_q_u] = mat_Drom_uu
+        self.mat_Drom[self.n_q_u:, :self.n_q_u] = mat_Drom_tu
+        self.mat_Drom[self.n_q_u:, self.n_q_u:] = mat_Drom_tt
+        self.mat_Krom = np.zeros((self.n_q_u + self.n_q_t, self.n_q_u + self.n_q_t))
+        self.mat_Krom[:self.n_q_u, :self.n_q_u] = mat_Krom_uu
+        self.mat_Krom[:self.n_q_u, self.n_q_u:] = mat_Krom_ut
+        self.mat_Krom[self.n_q_u:, self.n_q_u:] = mat_Krom_tt
+
+    def compute_ROM_forces(self):
+        # must have already called methods compute_ROB_u and compute_ROB_theta and have global finite element force
+        # vector F assembled
+
+        vec_F_fu = self.vec_F[self.free_dofs_U]
+        if self.dict_dirichlet_U is not None and self.mat_K is not None:
+            for tag, list_u_dir in self.dict_dirichlet_U.items():
+                dirichlet_nodes_U = self.mesh.dict_tri_groups[tag].flatten()
+                dirichlet_nodes_U = list(set(dirichlet_nodes_U))
+                vec_U = np.zeros((self.mesh.n_dofs,))
+                dirichlet_dofs_U = []
+                for node in dirichlet_nodes_U:
+                    for str_dof, val_u in list_u_dir:
+                        if str_dof == 'x':
+                            modif = 0
+                        elif str_dof == 'y':
+                            modif = 1
+                        elif str_dof == 'z':
+                            modif = 2
+                        else:
+                            raise ValueError('Unrecognized DOF.')
+                        dirichlet_dofs_U.append(node * 4 + modif)
+                        vec_U[node * 4 + modif] = val_u
+                vec_U_d = vec_U[dirichlet_dofs_U]
+                mat_K_fu_du = self.mat_K[self.free_dofs_U, :][:, dirichlet_dofs_U]
+                vec_F_fu -= mat_K_fu_du @ vec_U_d
+        vec_From_u = self.mat_phi_u.transpose() @ vec_F_fu
+
+        vec_F_ft = self.vec_F[self.free_dofs_theta]
+        if self.dict_dirichlet_theta is not None and self.mat_K is not None:
+            for tag, theta in self.dict_dirichlet_theta.items():
+                dirichlet_nodes_theta = self.mesh.dict_tri_groups[tag].flatten()
+                dirichlet_nodes_theta = list(set(dirichlet_nodes_theta))
+                vec_theta = np.zeros((self.mesh.n_dofs,))
+                dirichlet_dofs_theta = []
+                for node in dirichlet_nodes_theta:
+                    dirichlet_dofs_theta.append(node * 4 + 3)
+                    vec_theta[node * 4 + 3] = theta
+                vec_theta_d = vec_theta[dirichlet_dofs_theta]
+                mat_K_ft_dt = self.mat_K[self.free_dofs_theta, :][:, dirichlet_dofs_theta]
+                vec_F_ft -= mat_K_ft_dt @ vec_theta_d
+        vec_From_t = self.mat_phi_t.transpose() @ vec_F_ft
+
+        self.vec_From = np.zeros((self.n_q_u + self.n_q_t, ))
+        self.vec_From[:self.n_q_u] = vec_From_u
+        self.vec_From[self.n_q_u:] = vec_From_t
