@@ -95,8 +95,8 @@ if __name__ == '__main__':
     initial_Udot = np.zeros((model.mesh.n_nodes * 3, ))
     initial_theta = np.zeros((model.mesh.n_nodes, ))
     initial_thetadot = np.zeros((model.mesh.n_nodes, ))
-    n_modes_u = 20
-    n_modes_theta = 20
+    n_modes_u = 30
+    n_modes_theta = 30
 
     solver = LinearTransient(model, initial_U, initial_Udot, initial_theta, initial_thetadot, t_end, n_t, gamma, beta)
     solver.solve_ROM(n_modes_u=n_modes_u, n_modes_theta=n_modes_theta)
