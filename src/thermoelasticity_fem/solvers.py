@@ -222,19 +222,35 @@ class LinearTransient:
         self.model.assemble_M()
         self.model.assemble_K()
         self.model.assemble_D()
+        print('Computing reduced order bases...')
         self.model.compute_ROB_u(n_modes_u)
         self.model.compute_ROB_theta(n_modes_theta)
+        print('Computing reduced matrices...')
         self.model.compute_ROM_matrices()
+
+        print('Solving...')
 
         prev_q = np.zeros((self.model.n_q_u + self.model.n_q_t, ))
         prev_qdot = np.zeros((self.model.n_q_u + self.model.n_q_t, ))
         prev_qdotdot = np.zeros((self.model.n_q_u + self.model.n_q_t, ))
 
-        prev_q[:self.model.n_q_u] = self.model.mat_phi_u.transpose() @ self.initial_U
-        prev_q[self.model.n_q_u:] = self.model.mat_phi_t.transpose() @ self.initial_theta
+        initial_X = np.zeros((self.model.mesh.n_dofs, ))
+        initial_X[::4] = self.initial_U[::3]
+        initial_X[1::4] = self.initial_U[::3]
+        initial_X[2::4] = self.initial_U[::3]
+        initial_X[3::4] = self.initial_theta
 
-        prev_qdot[:self.model.n_q_u] = self.model.mat_phi_u.transpose() @ self.initial_Udot
-        prev_qdot[self.model.n_q_u:] = self.model.mat_phi_t.transpose() @ self.initial_thetadot
+        prev_q[:self.model.n_q_u] = self.model.mat_phi_u.transpose() @ initial_X[self.model.free_dofs_U]
+        prev_q[self.model.n_q_u:] = self.model.mat_phi_t.transpose() @ initial_X[self.model.free_dofs_theta]
+
+        initial_Xdot = np.zeros((self.model.mesh.n_dofs,))
+        initial_Xdot[::4] = self.initial_Udot[::3]
+        initial_Xdot[1::4] = self.initial_Udot[::3]
+        initial_Xdot[2::4] = self.initial_Udot[::3]
+        initial_Xdot[3::4] = self.initial_thetadot
+
+        prev_qdot[:self.model.n_q_u] = self.model.mat_phi_u.transpose() @ initial_Xdot[self.model.free_dofs_U]
+        prev_qdot[self.model.n_q_u:] = self.model.mat_phi_t.transpose() @ initial_Xdot[self.model.free_dofs_theta]
 
         self.q = np.zeros((self.model.n_q_u + self.model.n_q_t, self.n_t))
         self.qdot = np.zeros((self.model.n_q_u + self.model.n_q_t, self.n_t))
@@ -257,7 +273,7 @@ class LinearTransient:
                    - self.model.mat_Krom @ (prev_q + self.dt * prev_qdot
                                              + 0.5 * (self.dt ** 2) * (1 - 2 * self.beta) * prev_qdotdot))
 
-            new_qdotdot = spsolve(mat_Kdyn_rom, rhs)
+            new_qdotdot = np.linalg.solve(mat_Kdyn_rom, rhs)
             new_qdot = (prev_qdot
                         + (1 - self.gamma) * self.dt * prev_qdotdot
                         + self.gamma * self.dt * new_qdotdot)
@@ -279,6 +295,16 @@ class LinearTransient:
         self.T = np.zeros((self.model.mesh.n_nodes, self.n_t))
         self.Tdot = np.zeros((self.model.mesh.n_nodes, self.n_t))
         self.Tdotdot = np.zeros((self.model.mesh.n_nodes, self.n_t))
+
+        X = np.zeros((self.model.mesh.n_dofs, self.n_t))
+        X[self.model.free_dofs_U, :] = self.model.mat_phi_u @ self.q[:self.model.n_q_u, :]
+        X[self.model.free_dofs_theta, :] = self.model.mat_phi_t @ self.q[self.model.n_q_u:, :]
+        Xdot = np.zeros((self.model.mesh.n_dofs, self.n_t))
+        Xdot[self.model.free_dofs_U, :] = self.model.mat_phi_u @ self.qdot[:self.model.n_q_u, :]
+        Xdot[self.model.free_dofs_theta, :] = self.model.mat_phi_t @ self.qdot[self.model.n_q_u:, :]
+        Xdotdot = np.zeros((self.model.mesh.n_dofs, self.n_t))
+        Xdotdot[self.model.free_dofs_U, :] = self.model.mat_phi_u @ self.qdotdot[:self.model.n_q_u, :]
+        Xdotdot[self.model.free_dofs_theta, :] = self.model.mat_phi_t @ self.qdotdot[self.model.n_q_u:, :]
 
         if self.model.dict_dirichlet_U is not None:
             for tag, list_u_dir in self.model.dict_dirichlet_U.items():
@@ -302,9 +328,21 @@ class LinearTransient:
                 for node in dirichlet_nodes_T:
                     self.T[node, :] = theta
 
-        self.U[self.model.free_dofs_U, :] = self.model.mat_phi_u @ self.q[:self.model.n_q_u, :]
-        self.Udot[self.model.free_dofs_U, :] = self.model.mat_phi_u @ self.qdot[:self.model.n_q_u, :]
-        self.Udotdot[self.model.free_dofs_U, :] = self.model.mat_phi_u @ self.qdotdot[:self.model.n_q_u, :]
+        self.U[::3, :] = X[::4, :]
+        self.U[1::3, :] = X[1::4, :]
+        self.U[2::3, :] = X[2::4, :]
+
+        self.Udot[::3, :] = Xdot[::4, :]
+        self.Udot[1::3, :] = Xdot[1::4, :]
+        self.Udot[2::3, :] = Xdot[2::4, :]
+
+        self.Udotdot[::3, :] = Xdotdot[::4, :]
+        self.Udotdot[1::3, :] = Xdotdot[1::4, :]
+        self.Udotdot[2::3, :] = Xdotdot[2::4, :]
+
+        self.T = X[3::4, :]
+        self.Tdot = Xdot[3::4, :]
+        self.Tdotdot = Xdotdot[3::4, :]
 
         reference_temperature = np.zeros((self.model.mesh.n_nodes,))
         for i in range(self.model.mesh.n_nodes):
@@ -318,6 +356,3 @@ class LinearTransient:
             reference_temperature[i] /= n_count
 
         self.T += np.tile(reference_temperature[:, np.newaxis], (1, self.n_t))
-        self.T[self.model.free_dofs_theta, :] = self.model.mat_phi_t @ self.q[self.model.n_q_u:, :]
-        self.Tdot[self.model.free_dofs_theta, :] = self.model.mat_phi_t @ self.qdot[self.model.n_q_u:, :]
-        self.Tdotdot[self.model.free_dofs_theta, :] = self.model.mat_phi_t @ self.qdotdot[self.model.n_q_u:, :]
