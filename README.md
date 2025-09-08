@@ -57,4 +57,4 @@ High Temperatures - High Pressures, 2010.
 Special Interest Group Meeting on Thermal Issues, 2020. 
 
 Reference [1] was used for the equations of classical linear thermoelasticity. Reference [2] was used to obtain
-reasonable properties for a glass material. Reference [3] is meant to be used for reduced-order modeling.
+reasonable properties for a glass material. Reference [3] is used for computing the reduced-order model.
