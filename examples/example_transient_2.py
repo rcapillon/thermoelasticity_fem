@@ -1,9 +1,10 @@
-# import os
-# import sys
-#
-# sys.path.append(os.path.join(os.path.dirname(__file__), '../src'))
+import os
+import sys
+
+sys.path.append(os.path.join(os.path.dirname(__file__), '../src'))
 
 import numpy as np
+import time
 
 from thermoelasticity_fem.materials import LinearThermoElastic
 from thermoelasticity_fem.mesh import Mesh
@@ -13,6 +14,8 @@ from thermoelasticity_fem.plots import animate_U_T
 
 
 if __name__ == '__main__':
+    t0 = time.time()
+
     # Time interval and number of timesteps, defined here to make time-varying loads
     t_end = 1800e0
     n_t = int(1e3)
@@ -102,4 +105,7 @@ if __name__ == '__main__':
     save_path = './transient_animation_2.mp4'
     animate_U_T(solver.model.mesh, solver.T, solver.U, solver.vec_t, save_path,
                 amplification_factor_U=amplification_factor_U,
-                fps=200, quality=5)
+                fps=40, quality=5, step=5)
+
+    tf = time.time()
+    print(f'Total time: {tf - t0:.2f} seconds.')

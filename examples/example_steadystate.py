@@ -4,6 +4,7 @@
 # sys.path.append(os.path.join(os.path.dirname(__file__), '../src'))
 
 import numpy as np
+import time
 
 from thermoelasticity_fem.materials import LinearThermoElastic
 from thermoelasticity_fem.mesh import Mesh
@@ -13,6 +14,8 @@ from thermoelasticity_fem.plots import plot_U_T
 
 
 if __name__ == '__main__':
+    t0 = time.time()
+
     mesh = Mesh()
     mesh.load_mesh('../data/sandwich.msh')
 
@@ -78,3 +81,6 @@ if __name__ == '__main__':
     save_path = './steadystate.png'
 
     plot_U_T(solver.model.mesh, solver.T, solver.U, save_path=save_path)
+
+    tf = time.time()
+    print(f'Total time: {tf - t0:.2f} seconds.')
