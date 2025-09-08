@@ -11,7 +11,7 @@ examples is described in terms of tagged nodes, surfaces and volumes in the fold
 scripts have been updated accordingly.
 - Time-varying loads have been introduced for the transient solver. A new example script 'example_transient_2.py' 
 showcases that.
-- Reduced-order modeling for the transient solver using elastic and thermal modes. A new example script
+- Reduced-order modeling for the transient solver using elastic and thermal modes has been added. A new example script
 'example_transient_3.py' showcases that, mimicking the load case of 'example_transient_2.py' and solving much faster.
 
 ## Next developments
