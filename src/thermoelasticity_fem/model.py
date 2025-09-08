@@ -82,6 +82,7 @@ class Model:
         all_dirichlet_dofs = self.dirichlet_dofs_U + self.dirichlet_dofs_theta
         self.free_dofs = [dof for dof in range(self.mesh.n_dofs) if dof not in all_dirichlet_dofs]
         self.free_dofs_U = []
+        self.free_dofs_theta = []
         self.free_dofs_U.extend([node * 4 for node in range(self.mesh.n_nodes) if node * 4 not in all_dirichlet_dofs])
         self.free_dofs_U.extend([node * 4 + 1 for node in range(self.mesh.n_nodes)
                                  if node * 4 + 1 not in all_dirichlet_dofs])
@@ -352,7 +353,9 @@ class Model:
         mat_Muu = self.mat_M[self.free_dofs_U, :][:, self.free_dofs_U]
         mat_Kuu = self.mat_K[self.free_dofs_U, :][:, self.free_dofs_U]
 
-        _, self.mat_phi_u = eigs(mat_Kuu, k=self.n_q_u, M=mat_Muu)
+        _, self.mat_phi_u = eigs(mat_Kuu, k=self.n_q_u, M=mat_Muu, which='SM')
+
+        self.mat_phi_u = np.real(self.mat_phi_u)
 
     def compute_ROB_theta(self, n_q_t):
         # must have already called method create_dof_lists and have global finite element matrices D and K assembled
@@ -362,7 +365,9 @@ class Model:
         mat_Dtt = self.mat_D[self.free_dofs_theta, :][:, self.free_dofs_theta]
         mat_Ktt = self.mat_K[self.free_dofs_theta, :][:, self.free_dofs_theta]
 
-        _, self.mat_phi_t = eigs(mat_Ktt, k=self.n_q_t, M=mat_Dtt)
+        _, self.mat_phi_t = eigs(mat_Ktt, k=self.n_q_t, M=mat_Dtt, which='SM')
+
+        self.mat_phi_t = np.real(self.mat_phi_t)
 
     def compute_ROM_matrices(self):
         # must have already called methods compute_ROB_u and compute_ROB_theta and have global finite element matrices

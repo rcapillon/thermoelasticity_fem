@@ -23,7 +23,8 @@ def plot_U_T(mesh, temperature, displacement, amplification_factor_U=1., save_pa
         plt.savefig(save_path)
 
 
-def animate_U_T(mesh, temperature, displacement, vec_t, save_path, amplification_factor_U=1., fps=10, quality=5):
+def animate_U_T(mesh, temperature, displacement, vec_t, save_path,
+                amplification_factor_U=1., fps=10, quality=5, step=1):
     mio_mesh = mesh.make_meshio_mesh()
 
     val_min = np.amin(temperature.flatten())
@@ -51,7 +52,7 @@ def animate_U_T(mesh, temperature, displacement, vec_t, save_path, amplification
     p.add_title(f't = {vec_t[0]:.3f} s')
     p.write_frame()
 
-    for i in range(1, vec_t.size):
+    for i in range(1, vec_t.size, step):
         p.remove_actor(actor)
         pv_mesh = pv.from_meshio(mio_mesh)
         pv_mesh.point_data['T'] = temperature[:, i]
