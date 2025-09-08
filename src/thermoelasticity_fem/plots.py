@@ -72,3 +72,31 @@ def animate_U_T(mesh, temperature, displacement, vec_t, save_path,
         p.write_frame()
 
     p.close()
+
+
+def plot_dofU_vs_t(dof_num, vec_t, displacement, save_path=None):
+    _, ax = plt.subplots()
+    ax.plot(vec_t, displacement[dof_num, :], '-b')
+    ax.set_xlabel('t [s]')
+    ax.set_ylabel('displacement [m]')
+    ax.set_title(f'Displacement, DOF {dof_num}')
+    ax.grid()
+
+    if save_path is not None:
+        plt.savefig(save_path)
+    else:
+        plt.show()
+
+
+def plot_nodeT_vs_t(node_num, vec_t, temperature, save_path=None):
+    _, ax = plt.subplots()
+    ax.plot(vec_t, temperature[node_num, :], '-b')
+    ax.set_xlabel('t [s]')
+    ax.set_ylabel('Temperature [degrees]')
+    ax.set_title(f'Temperature, node {node_num}')
+    ax.grid()
+
+    if save_path is not None:
+        plt.savefig(save_path)
+    else:
+        plt.show()
