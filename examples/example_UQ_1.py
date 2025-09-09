@@ -99,7 +99,8 @@ if __name__ == '__main__':
     n_modes_u = 30
     n_modes_theta = 30
 
-    n_samples = 100
+    n_samples = 50
+    dict_dispersion_coeff = {'M_uu': 0.3, 'D_uu': 0.3, 'D_tu': 0.3, 'D_tt': 0.3, 'K_uu': 0.3, 'K_ut': 0.3, 'K_tt': 0.3}
     node_num = model.mesh.dict_nodes_groups[8]
     Udof_num = node_num * 3
 
@@ -107,7 +108,8 @@ if __name__ == '__main__':
     (deterministic_U, deterministic_Udot, deterministic_Udotdot,
      deterministic_T, deterministic_Tdot, deterministic_Tdotdot,
      random_U, random_Udot, random_Udotdot,
-     random_T, random_Tdot, random_Tdotdot) = solver.solve_ROM_nonparametric(n_modes_u, n_modes_theta, n_samples,
+     random_T, random_Tdot, random_Tdotdot) = solver.solve_ROM_nonparametric(n_modes_u, n_modes_theta,
+                                                                             dict_dispersion_coeff, n_samples,
                                                                              [Udof_num], [node_num])
 
     ####

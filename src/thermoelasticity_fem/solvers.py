@@ -353,7 +353,8 @@ class LinearTransient:
 
         self.T += np.tile(reference_temperature[:, np.newaxis], (1, self.n_t))
 
-    def solve_ROM_nonparametric(self, n_modes_u, n_modes_theta, n_samples, observed_dofs_U, observed_nodes_T):
+    def solve_ROM_nonparametric(self, n_modes_u, n_modes_theta, dict_dispersion_coeff, n_samples,
+                                observed_dofs_U, observed_nodes_T):
         self.model.create_free_dofs_lists()
         self.model.assemble_M()
         self.model.assemble_K()
@@ -518,14 +519,13 @@ class LinearTransient:
         random_Tdotdot = np.zeros((len(observed_nodes_T), self.n_t, n_samples))
 
         for j in tqdm(range(n_samples)):
-            dispersion_coeff = 0.2
-            random_M_uu = SE_0_plus(dispersion_coeff, mean_M_uu, 1)[:, :, 0]
-            random_D_uu = SE_plus0(dispersion_coeff, mean_D_uu, 1, eps=1e-6, tol=1e-9)[:, :, 0]
-            random_D_tu = SE_rect(dispersion_coeff, mean_D_tu, 1, eps=1e-6)[:, :, 0]
-            random_D_tt = SE_0_plus(dispersion_coeff, mean_D_tt, 1)[:, :, 0]
-            random_K_uu = SE_0_plus(dispersion_coeff, mean_K_uu, 1)[:, :, 0]
-            random_K_ut = SE_rect(dispersion_coeff, mean_K_ut, 1, eps=1e-6)[:, :, 0]
-            random_K_tt = SE_0_plus(dispersion_coeff, mean_K_tt, 1)[:, :, 0]
+            random_M_uu = SE_0_plus(dict_dispersion_coeff['M_uu'], mean_M_uu, 1)[:, :, 0]
+            random_D_uu = SE_plus0(dict_dispersion_coeff['D_uu'], mean_D_uu, 1, eps=1e-6, tol=1e-9)[:, :, 0]
+            random_D_tu = SE_rect(dict_dispersion_coeff['D_tu'], mean_D_tu, 1, eps=1e-6)[:, :, 0]
+            random_D_tt = SE_0_plus(dict_dispersion_coeff['D_tt'], mean_D_tt, 1)[:, :, 0]
+            random_K_uu = SE_0_plus(dict_dispersion_coeff['K_uu'], mean_K_uu, 1)[:, :, 0]
+            random_K_ut = SE_rect(dict_dispersion_coeff['K_ut'], mean_K_ut, 1, eps=1e-6)[:, :, 0]
+            random_K_tt = SE_0_plus(dict_dispersion_coeff['K_tt'], mean_K_tt, 1)[:, :, 0]
 
             random_Mrom = np.zeros((n_modes_u + n_modes_theta, n_modes_u + n_modes_theta))
             random_Drom = np.zeros((n_modes_u + n_modes_theta, n_modes_u + n_modes_theta))

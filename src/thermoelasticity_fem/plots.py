@@ -114,11 +114,11 @@ def plot_dofU_vs_t_random(vec_t, displacement_random, displacement_deterministic
     ax.set_title('Displacement, observed dof')
 
     if confidence_level is not None:
-        n_rejected_samples = int(np.floor((1 - confidence_level) * displacement_random.shape[2] / 2))
-        ordered_samples = np.zeros((displacement_random.shape[1], displacement_random.shape[2]))
-        lower_confidence_bound = np.zeros((displacement_random.shape[1], ))
-        upper_confidence_bound = np.zeros((displacement_random.shape[1], ))
-        for i in range(displacement_random.shape[1]):
+        n_rejected_samples = int(np.floor((1 - confidence_level) * displacement_random.shape[1] / 2))
+        ordered_samples = np.zeros((displacement_random.shape[0], displacement_random.shape[1]))
+        lower_confidence_bound = np.zeros((displacement_random.shape[0], ))
+        upper_confidence_bound = np.zeros((displacement_random.shape[0], ))
+        for i in range(displacement_random.shape[0]):
             ordered_samples[i, :] = np.sort(displacement_random[i, :])
             lower_confidence_bound[i] = ordered_samples[i, n_rejected_samples]
             upper_confidence_bound[i] = ordered_samples[i, -(n_rejected_samples + 1)]
@@ -126,7 +126,7 @@ def plot_dofU_vs_t_random(vec_t, displacement_random, displacement_deterministic
         ax.plot(vec_t, upper_confidence_bound, '--g')
         ax.fill_between(vec_t, lower_confidence_bound, upper_confidence_bound, color='cyan')
 
-    ax.legend()
+    ax.legend(loc='upper right')
     ax.grid()
 
     if save_path is not None:
@@ -147,11 +147,11 @@ def plot_nodeT_vs_t_random(vec_t, temperature_random, temperature_deterministic,
     ax.set_title('Temperature, observed node')
 
     if confidence_level is not None:
-        n_rejected_samples = int(np.floor((1 - confidence_level) * temperature_random.shape[2] / 2))
-        ordered_samples = np.zeros((temperature_random.shape[1], temperature_random.shape[2]))
-        lower_confidence_bound = np.zeros((temperature_random.shape[1], ))
-        upper_confidence_bound = np.zeros((temperature_random.shape[1], ))
-        for i in range(temperature_random.shape[1]):
+        n_rejected_samples = int(np.floor((1 - confidence_level) * temperature_random.shape[1] / 2))
+        ordered_samples = np.zeros((temperature_random.shape[0], temperature_random.shape[1]))
+        lower_confidence_bound = np.zeros((temperature_random.shape[0], ))
+        upper_confidence_bound = np.zeros((temperature_random.shape[0], ))
+        for i in range(temperature_random.shape[0]):
             ordered_samples[i, :] = np.sort(temperature_random[i, :])
             lower_confidence_bound[i] = ordered_samples[i, n_rejected_samples]
             upper_confidence_bound[i] = ordered_samples[i, -(n_rejected_samples + 1)]
@@ -159,7 +159,7 @@ def plot_nodeT_vs_t_random(vec_t, temperature_random, temperature_deterministic,
         ax.plot(vec_t, upper_confidence_bound, '--g')
         ax.fill_between(vec_t, lower_confidence_bound, upper_confidence_bound, color='cyan')
 
-    ax.legend()
+    ax.legend(loc='upper right')
     ax.grid()
 
     if save_path is not None:
