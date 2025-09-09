@@ -108,12 +108,10 @@ def plot_dofU_vs_t_random(vec_t, displacement_random, displacement_deterministic
 
     _, ax = plt.subplots()
     ax.plot(vec_t, Udof_mean.flatten(), '-b', label='statistical mean')
-    ax.plot(vec_t, displacement_deterministic, '-r', label='deterministic response')
+    ax.plot(vec_t, displacement_deterministic.flatten(), '-r', label='deterministic response')
     ax.set_xlabel('t [s]')
     ax.set_ylabel('displacement [m]')
     ax.set_title('Displacement, observed dof')
-    ax.legend()
-    ax.grid()
 
     if confidence_level is not None:
         n_rejected_samples = int(np.floor((1 - confidence_level) * displacement_random.shape[2] / 2))
@@ -128,6 +126,9 @@ def plot_dofU_vs_t_random(vec_t, displacement_random, displacement_deterministic
         ax.plot(vec_t, upper_confidence_bound, '--g')
         ax.fill_between(vec_t, lower_confidence_bound, upper_confidence_bound, color='cyan')
 
+    ax.legend()
+    ax.grid()
+
     if save_path is not None:
         plt.savefig(save_path)
     else:
@@ -140,12 +141,10 @@ def plot_nodeT_vs_t_random(vec_t, temperature_random, temperature_deterministic,
 
     _, ax = plt.subplots()
     ax.plot(vec_t, Tnode_mean.flatten(), '-b', label='statistical mean')
-    ax.plot(vec_t, temperature_deterministic, '-r', label='deterministic response')
+    ax.plot(vec_t, temperature_deterministic.flatten(), '-r', label='deterministic response')
     ax.set_xlabel('t [s]')
     ax.set_ylabel('temperature [degrees]')
     ax.set_title('Temperature, observed node')
-    ax.legend()
-    ax.grid()
 
     if confidence_level is not None:
         n_rejected_samples = int(np.floor((1 - confidence_level) * temperature_random.shape[2] / 2))
@@ -159,6 +158,9 @@ def plot_nodeT_vs_t_random(vec_t, temperature_random, temperature_deterministic,
         ax.plot(vec_t, lower_confidence_bound, '--g', label=f'{confidence_level * 100}% confidence interval')
         ax.plot(vec_t, upper_confidence_bound, '--g')
         ax.fill_between(vec_t, lower_confidence_bound, upper_confidence_bound, color='cyan')
+
+    ax.legend()
+    ax.grid()
 
     if save_path is not None:
         plt.savefig(save_path)
