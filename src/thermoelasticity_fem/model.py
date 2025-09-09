@@ -43,15 +43,8 @@ class Model:
         self.n_q_t = None
         self.mat_phi_u = None
         self.mat_phi_t = None
-        self.mat_Mrom_uu = None
         self.mat_Mrom = None
-        self.mat_Drom_uu = None
-        self.mat_Drom_tu = None
-        self.mat_Drom_tt = None
         self.mat_Drom = None
-        self.mat_Krom_uu = None
-        self.mat_Krom_ut = None
-        self.mat_Krom_tt = None
         self.mat_Krom = None
         self.vec_From = None
 
