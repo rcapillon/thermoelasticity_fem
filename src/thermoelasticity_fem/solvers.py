@@ -364,7 +364,7 @@ class LinearTransient:
         print('Computing reduced mean matrices...')
         self.model.compute_ROM_matrices()
 
-        print("Computing random matrices samples")
+        print("Computing mean matrices")
         mean_M_uu = self.model.mat_Mrom[:n_modes_u, :n_modes_u]
         mean_D_uu = self.model.mat_Drom[:n_modes_u, :n_modes_u]
         mean_D_tu = self.model.mat_Drom[n_modes_u:, :n_modes_u]
@@ -372,27 +372,6 @@ class LinearTransient:
         mean_K_uu = self.model.mat_Krom[:n_modes_u, :n_modes_u]
         mean_K_ut = self.model.mat_Krom[:n_modes_u, n_modes_u:]
         mean_K_tt = self.model.mat_Krom[n_modes_u:, n_modes_u:]
-
-        dispersion_coeff = 0.2
-        samples_M_uu = SE_0_plus(dispersion_coeff, mean_M_uu, n_samples)
-        samples_D_uu = SE_plus0(dispersion_coeff, mean_D_uu, n_samples, eps=1e-6, tol=1e-9)
-        samples_D_tu = SE_rect(dispersion_coeff, mean_D_tu, n_samples, eps=1e-6)
-        samples_D_tt = SE_0_plus(dispersion_coeff, mean_D_tt, n_samples)
-        samples_K_uu = SE_0_plus(dispersion_coeff, mean_K_uu, n_samples)
-        samples_K_ut = SE_rect(dispersion_coeff, mean_K_ut, n_samples, eps=1e-6)
-        samples_K_tt = SE_0_plus(dispersion_coeff, mean_K_tt, n_samples)
-
-        samples_Mrom = np.zeros((n_modes_u + n_modes_theta, n_modes_u + n_modes_theta, n_samples))
-        samples_Drom = np.zeros((n_modes_u + n_modes_theta, n_modes_u + n_modes_theta, n_samples))
-        samples_Krom = np.zeros((n_modes_u + n_modes_theta, n_modes_u + n_modes_theta, n_samples))
-
-        samples_Mrom[:n_modes_u, :n_modes_u, :] = samples_M_uu
-        samples_Drom[:n_modes_u, :n_modes_u, :] = samples_D_uu
-        samples_Drom[n_modes_u:, :n_modes_u, :] = samples_D_tu
-        samples_Drom[n_modes_u:, n_modes_u:, :] = samples_D_tt
-        samples_Krom[:n_modes_u, :n_modes_u, :] = samples_K_uu
-        samples_Krom[:n_modes_u, n_modes_u:, :] = samples_K_ut
-        samples_Krom[n_modes_u:, n_modes_u:, :] = samples_K_tt
 
         reference_temperature = np.zeros((self.model.mesh.n_nodes,))
         for i in range(self.model.mesh.n_nodes):
@@ -511,13 +490,13 @@ class LinearTransient:
                             modif = 2
                         else:
                             raise ValueError('Unrecognized DOF.')
-                        self.U[node * 3 + modif, :] = val_u
+                        U[node * 3 + modif, :] = val_u
         if self.model.dict_dirichlet_theta is not None:
             for tag, theta in self.model.dict_dirichlet_theta.items():
                 dirichlet_nodes_T = self.model.mesh.dict_tri_groups[tag].flatten()
                 dirichlet_nodes_T = list(set(dirichlet_nodes_T))
                 for node in dirichlet_nodes_T:
-                    self.T[node, :] = theta
+                    T[node, :] = theta
 
         T += np.tile(reference_temperature[:, np.newaxis], (1, self.n_t))
 
@@ -539,9 +518,30 @@ class LinearTransient:
         random_Tdotdot = np.zeros((len(observed_nodes_T), self.n_t, n_samples))
 
         for j in tqdm(range(n_samples)):
-            self.model.mat_Mrom = samples_Mrom[:, :, j]
-            self.model.mat_Drom = samples_Drom[:, :, j]
-            self.model.mat_Krom = samples_Krom[:, :, j]
+            dispersion_coeff = 0.2
+            random_M_uu = SE_0_plus(dispersion_coeff, mean_M_uu, 1)[:, :, 0]
+            random_D_uu = SE_plus0(dispersion_coeff, mean_D_uu, 1, eps=1e-6, tol=1e-9)[:, :, 0]
+            random_D_tu = SE_rect(dispersion_coeff, mean_D_tu, 1, eps=1e-6)[:, :, 0]
+            random_D_tt = SE_0_plus(dispersion_coeff, mean_D_tt, 1)[:, :, 0]
+            random_K_uu = SE_0_plus(dispersion_coeff, mean_K_uu, 1)[:, :, 0]
+            random_K_ut = SE_rect(dispersion_coeff, mean_K_ut, 1, eps=1e-6)[:, :, 0]
+            random_K_tt = SE_0_plus(dispersion_coeff, mean_K_tt, 1)[:, :, 0]
+
+            random_Mrom = np.zeros((n_modes_u + n_modes_theta, n_modes_u + n_modes_theta))
+            random_Drom = np.zeros((n_modes_u + n_modes_theta, n_modes_u + n_modes_theta))
+            random_Krom = np.zeros((n_modes_u + n_modes_theta, n_modes_u + n_modes_theta))
+
+            random_Mrom[:n_modes_u, :n_modes_u] = random_M_uu
+            random_Drom[:n_modes_u, :n_modes_u] = random_D_uu
+            random_Drom[n_modes_u:, :n_modes_u] = random_D_tu
+            random_Drom[n_modes_u:, n_modes_u:] = random_D_tt
+            random_Krom[:n_modes_u, :n_modes_u] = random_K_uu
+            random_Krom[:n_modes_u, n_modes_u:] = random_K_ut
+            random_Krom[n_modes_u:, n_modes_u:] = random_K_tt
+
+            self.model.mat_Mrom = random_Mrom
+            self.model.mat_Drom = random_Drom
+            self.model.mat_Krom = random_Krom
 
             prev_q = np.zeros((self.model.n_q_u + self.model.n_q_t,))
             prev_qdot = np.zeros((self.model.n_q_u + self.model.n_q_t,))
