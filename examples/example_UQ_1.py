@@ -95,9 +95,11 @@ if __name__ == '__main__':
     initial_Udot = np.zeros((model.mesh.n_nodes * 3, ))
     initial_theta = np.zeros((model.mesh.n_nodes, ))
     initial_thetadot = np.zeros((model.mesh.n_nodes, ))
+
     n_modes_u = 30
     n_modes_theta = 30
-    n_samples = 10
+
+    n_samples = 100
     node_num = model.mesh.dict_nodes_groups[8]
     Udof_num = node_num * 3
 
